@@ -1,42 +1,30 @@
-# Build results
+# Fichiers de build et binaires
+[Bb]in/
+[Oo]bj/
 [Dd]ebug/
-[Dd]ebugPublic/
 [Rr]elease/
-[Rr]eleases/
 x64/
 x86/
-[Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
-[Oo]bj/
 [Ll]og/
 [Ll]ogs/
-publish/
 
-# Visual Studio files
+# Fichiers générés par Visual Studio
 .vs/
 *.user
 *.userosscache
-*.sln.docstates
 *.suo
-*.userprefs
-*.dbmdl
-*.jfm
-
-# Visual Studio Code files
-.vscode/
-*.code-workspace
-
-# Rider
-.idea/
-
-# User-specific files
-*.rsuser
-*.dtbuild.dtproj.user
-
-# Files built by Visual Studio
+*.psess
+*.vsp
+*.vspx
+*.sap
+*.cache
+*.dll.config
+*.pdb
+*.exe
+*.dll
 *_i.c
 *_p.c
 *_h.h
@@ -45,7 +33,6 @@ publish/
 *.obj
 *.iobj
 *.pch
-*.pdb
 *.ipdb
 *.pgc
 *.pgd
@@ -58,31 +45,89 @@ publish/
 *.tmp_proj
 *_wpftmp.csproj
 *.log
-*.vspscc
-*.vssscc
 .builds
-*.pidb
-*.svclog
-*.scc
+ipch/
+*.aps
+*.ncb
+*.opendb
+*.opensdf
+*.sdf
+*.cachefile
+*.VC.db
+*.VC.VC.opendb
 
-# .NET Core
+# Fichiers de configuration potentiellement sensibles
+appsettings.*.json
+*.pubxml
+**/Properties/launchSettings.json
+config/
+config/*.ini
+**/config/server_api.ini
+ConnectionStrings.config
+
+# Fichiers spécifiques à .NET Core et ASP.NET
+*.swp
+*.*~
 project.lock.json
 project.fragment.lock.json
 artifacts/
+**/.DS_Store
 
-# Fichiers exécutables et packages
-*.exe
-*.dll
-*.pdb
-*.nupkg
-*.snupkg
+# Fichiers de base de données et autres
+*.mdf
+*.ldf
+*.ndf
+*.jfm
+*.bak
 
-# Fichiers de configuration spécifiques à l'environnement
-appsettings.Development.json
-appsettings.Production.json
-*.ini
+# Dossiers Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
 
-# Cache et fichiers temporaires
-[Tt]emp/
-.DS_Store
-Thumbs.db
+# Dossiers de packages
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# IDE spécifiques
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Rider
+.idea/
+*.sln.iml
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NUNIT
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# Fichiers de déploiement
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+PublishProfiles/
+PublishScripts/
+
+# Logs et fichiers temporaires
+*.sw?
+*~
+*.dbmdl
+*.dbproj.schemaview
+*.pfx
+*.publishsettings
+
+# Certificats et clés privées
+*.pfx
+*.key
+*.pem
