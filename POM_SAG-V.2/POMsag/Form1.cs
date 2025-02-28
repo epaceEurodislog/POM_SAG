@@ -169,13 +169,13 @@ namespace POMsag
                 using var connection = new SqlConnection(_destinationConnectionString);
                 await connection.OpenAsync();
 
-                var checkTableQuery = @"
+                var checkTableQuery = @" 
                     IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'JSON_DAT')
                     CREATE TABLE JSON_DAT (
                         JsonContent NVARCHAR(MAX) NOT NULL,
                         CreatedAt VARCHAR(8) NOT NULL,
                         SourceTable VARCHAR(50) NOT NULL
-                    )";
+                    )"; //Revoir requête
 
                 using (var command = new SqlCommand(checkTableQuery, connection))
                 {
@@ -184,7 +184,7 @@ namespace POMsag
 
                 var query = @"
                     INSERT INTO JSON_DAT (JsonContent, CreatedAt, SourceTable) 
-                    VALUES (@JsonContent, @CreatedAt, @SourceTable)";
+                    VALUES (@JsonContent, @CreatedAt, @SourceTable)"; //Modifier
 
                 using var insertCommand = new SqlCommand(query, connection);
                 insertCommand.Parameters.AddWithValue("@JsonContent", jsonData);
