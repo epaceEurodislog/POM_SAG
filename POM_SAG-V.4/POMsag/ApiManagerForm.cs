@@ -202,24 +202,25 @@ namespace POMsag
             apiInfoPanel.Controls.Add(apiInfoContent);
             apiInfoPanel.Controls.Add(apiInfoTitle);
 
-            // Boutons pour les API
+            // Boutons pour les API - Modification pour rendre les boutons visibles
             var apiButtonsPanel = new Panel
             {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(0, 10, 0, 0)
+                Dock = DockStyle.Top, // Changé de Bottom à Top
+                Height = 60,
+                Padding = new Padding(10),
+                BackColor = ColorPalette.SecondaryBackground, // Couleur de fond pour les distinguer
+                Margin = new Padding(0, 0, 0, 10)
             };
 
             buttonAddApi = new Button
             {
                 Text = "Ajouter",
                 Width = 120,
-                Height = 35,
+                Height = 40,
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 0, 10, 0),
-                Location = new Point(0, 5)
+                Location = new Point(10, 10)
             };
             buttonAddApi.FlatAppearance.BorderSize = 0;
 
@@ -227,13 +228,11 @@ namespace POMsag
             {
                 Text = "Modifier",
                 Width = 120,
-                Height = 35,
-                Left = 130,
+                Height = 40,
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(10, 0, 10, 0),
-                Location = new Point(130, 5)
+                Location = new Point(140, 10)
             };
             buttonEditApi.FlatAppearance.BorderSize = 0;
 
@@ -241,12 +240,11 @@ namespace POMsag
             {
                 Text = "Supprimer",
                 Width = 120,
-                Height = 35,
-                Left = 260,
+                Height = 40,
                 BackColor = Color.FromArgb(229, 62, 62),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(260, 5)
+                Location = new Point(270, 10)
             };
             buttonDeleteApi.FlatAppearance.BorderSize = 0;
 
@@ -254,7 +252,9 @@ namespace POMsag
             buttonEditApi.Click += ButtonEditApi_Click;
             buttonDeleteApi.Click += ButtonDeleteApi_Click;
 
-            apiButtonsPanel.Controls.AddRange(new Control[] { buttonAddApi, buttonEditApi, buttonDeleteApi });
+            apiButtonsPanel.Controls.Add(buttonAddApi);
+            apiButtonsPanel.Controls.Add(buttonEditApi);
+            apiButtonsPanel.Controls.Add(buttonDeleteApi);
 
             // ---- SECTION DES ENDPOINTS (Panel droit) ---- //
 
@@ -276,6 +276,60 @@ namespace POMsag
                 ForeColor = ColorPalette.PrimaryText
             };
 
+            // Boutons pour les endpoints - Modification pour rendre les boutons visibles
+            var endpointButtonsPanel = new Panel
+            {
+                Dock = DockStyle.Top, // Changé de Bottom à Top
+                Height = 60,
+                Padding = new Padding(10),
+                BackColor = ColorPalette.SecondaryBackground,
+                Margin = new Padding(0, 0, 0, 10)
+            };
+
+            buttonAddEndpoint = new Button
+            {
+                Text = "Ajouter",
+                Width = 120,
+                Height = 40,
+                BackColor = ColorPalette.AccentColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Location = new Point(10, 10)
+            };
+            buttonAddEndpoint.FlatAppearance.BorderSize = 0;
+
+            buttonEditEndpoint = new Button
+            {
+                Text = "Modifier",
+                Width = 120,
+                Height = 40,
+                BackColor = ColorPalette.AccentColor,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Location = new Point(140, 10)
+            };
+            buttonEditEndpoint.FlatAppearance.BorderSize = 0;
+
+            buttonDeleteEndpoint = new Button
+            {
+                Text = "Supprimer",
+                Width = 120,
+                Height = 40,
+                BackColor = Color.FromArgb(229, 62, 62),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Location = new Point(270, 10)
+            };
+            buttonDeleteEndpoint.FlatAppearance.BorderSize = 0;
+
+            buttonAddEndpoint.Click += ButtonAddEndpoint_Click;
+            buttonEditEndpoint.Click += ButtonEditEndpoint_Click;
+            buttonDeleteEndpoint.Click += ButtonDeleteEndpoint_Click;
+
+            endpointButtonsPanel.Controls.Add(buttonAddEndpoint);
+            endpointButtonsPanel.Controls.Add(buttonEditEndpoint);
+            endpointButtonsPanel.Controls.Add(buttonDeleteEndpoint);
+
             listEndpoints = new ListView
             {
                 Dock = DockStyle.Fill,
@@ -291,66 +345,12 @@ namespace POMsag
             listEndpoints.Columns.Add("Méthode", 70);
             listEndpoints.Columns.Add("Filtre par date", 120);
 
-            // Boutons pour les endpoints
-            var endpointButtonsPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(0, 10, 0, 0)
-            };
-
-            buttonAddEndpoint = new Button
-            {
-                Text = "Ajouter",
-                Width = 120,
-                Height = 35,
-                BackColor = ColorPalette.AccentColor,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(0, 0, 10, 0),
-                Location = new Point(0, 5)
-            };
-            buttonAddEndpoint.FlatAppearance.BorderSize = 0;
-
-            buttonEditEndpoint = new Button
-            {
-                Text = "Modifier",
-                Width = 120,
-                Height = 35,
-                Left = 130,
-                BackColor = ColorPalette.AccentColor,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Margin = new Padding(10, 0, 10, 0),
-                Location = new Point(130, 5)
-            };
-            buttonEditEndpoint.FlatAppearance.BorderSize = 0;
-
-            buttonDeleteEndpoint = new Button
-            {
-                Text = "Supprimer",
-                Width = 120,
-                Height = 35,
-                Left = 260,
-                BackColor = Color.FromArgb(229, 62, 62),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(260, 5)
-            };
-            buttonDeleteEndpoint.FlatAppearance.BorderSize = 0;
-
-            buttonAddEndpoint.Click += ButtonAddEndpoint_Click;
-            buttonEditEndpoint.Click += ButtonEditEndpoint_Click;
-            buttonDeleteEndpoint.Click += ButtonDeleteEndpoint_Click;
-
-            endpointButtonsPanel.Controls.AddRange(new Control[] { buttonAddEndpoint, buttonEditEndpoint, buttonDeleteEndpoint });
-
-            // Bouton fermer en bas
+            // Bouton fermer en bas - Réduit la hauteur pour plus d'espace
             var bottomPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(0, 10, 0, 0),
+                Height = 40, // Réduit la hauteur de 60 à 40
+                Padding = new Padding(0, 5, 0, 0),
                 BackColor = ColorPalette.PrimaryBackground
             };
 
@@ -358,12 +358,12 @@ namespace POMsag
             {
                 Text = "Fermer",
                 Width = 150,
-                Height = 40,
+                Height = 30,
                 BackColor = ColorPalette.SecondaryBackground,
                 ForeColor = ColorPalette.PrimaryText,
                 FlatStyle = FlatStyle.Flat,
                 Anchor = AnchorStyles.Right,
-                Location = new Point(bottomPanel.Width - 170, 10),
+                Location = new Point(bottomPanel.Width - 170, 5),
                 DialogResult = DialogResult.Cancel
             };
             closeButton.FlatAppearance.BorderSize = 1;
@@ -375,20 +375,20 @@ namespace POMsag
                 Text = "Les modifications sont automatiquement enregistrées.",
                 ForeColor = ColorPalette.SecondaryText,
                 AutoSize = true,
-                Location = new Point(10, 20)
+                Location = new Point(10, 10)
             };
 
             bottomPanel.Controls.Add(closeButton);
             bottomPanel.Controls.Add(infoLabel);
 
-            // Assembler les panneaux
+            // Assembler les panneaux - Changement de l'ordre pour rendre les boutons visibles
+            apiPanel.Controls.Add(apiButtonsPanel); // Ajout du panel des boutons API en premier
             apiPanel.Controls.Add(apiInfoPanel);
-            apiPanel.Controls.Add(apiButtonsPanel);
             apiPanel.Controls.Add(comboApis);
             apiPanel.Controls.Add(apiLabel);
 
+            endpointPanel.Controls.Add(endpointButtonsPanel); // Ajout du panel des boutons Endpoint en premier
             endpointPanel.Controls.Add(listEndpoints);
-            endpointPanel.Controls.Add(endpointButtonsPanel);
             endpointPanel.Controls.Add(endpointLabel);
 
             splitContainer.Panel1.Controls.Add(apiPanel);
@@ -406,7 +406,6 @@ namespace POMsag
             this.Load += Form_Load;
         }
 
-        // Dans ApiManagerForm.cs, modifiez la méthode Form_Load comme ceci:
         private void Form_Load(object sender, EventArgs e)
         {
             // Définir les tailles minimales des panneaux seulement après le chargement
@@ -438,10 +437,11 @@ namespace POMsag
                 }
             }));
         }
+
         private void Form_Resize(object sender, EventArgs e)
         {
             if (closeButton != null)
-                closeButton.Location = new Point(closeButton.Parent.Width - 170, 10);
+                closeButton.Location = new Point(closeButton.Parent.Width - 170, 5);
 
             ApplySafeSplitterDistance(splitContainer);
         }
@@ -628,6 +628,7 @@ namespace POMsag
                     MessageBoxIcon.Error);
             }
         }
+
         private void ButtonEditApi_Click(object sender, EventArgs e)
         {
             if (comboApis.SelectedIndex < 0)
