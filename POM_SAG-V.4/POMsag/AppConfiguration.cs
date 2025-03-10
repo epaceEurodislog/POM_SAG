@@ -189,35 +189,21 @@ namespace POMsag
             parser.WriteFile(CONFIG_FILE, configData);
         }
 
+        // Dans AppConfiguration.cs, modifiez la méthode CreateDefaultApis()
         private void CreateDefaultApis()
         {
             ConfiguredApis = new List<ApiConfiguration>();
 
-            // Création de l'API POM par défaut
-            var pomApi = new ApiConfiguration("pom", "API POM", ApiUrl)
-            {
-                AuthType = AuthenticationType.ApiKey,
-                AuthParameters = new Dictionary<string, string> { { "HeaderName", "X-Api-Key" }, { "Value", ApiKey } }
-            };
-
-            // Ajout des endpoints POM
-            pomApi.Endpoints.Add(new ApiEndpoint("Clients", "clients") { SupportsDateFiltering = true });
-            pomApi.Endpoints.Add(new ApiEndpoint("Commandes", "commandes") { SupportsDateFiltering = true });
-            pomApi.Endpoints.Add(new ApiEndpoint("Produits", "produits") { SupportsDateFiltering = true });
-            pomApi.Endpoints.Add(new ApiEndpoint("LignesCommandes", "lignescommandes") { SupportsDateFiltering = true });
-
-            ConfiguredApis.Add(pomApi);
-
-            // Création de l'API Dynamics 365 par défaut
+            // Création de l'API Dynamics 365 par défaut (UNIQUEMENT)
             var d365Api = new ApiConfiguration("dynamics", "Dynamics 365", DynamicsApiUrl)
             {
                 AuthType = AuthenticationType.OAuth2ClientCredentials,
                 AuthParameters = new Dictionary<string, string> {
-                    { "TokenUrl", TokenUrl },
-                    { "ClientId", ClientId },
-                    { "ClientSecret", ClientSecret },
-                    { "Resource", Resource }
-                }
+            { "TokenUrl", TokenUrl },
+            { "ClientId", ClientId },
+            { "ClientSecret", ClientSecret },
+            { "Resource", Resource }
+        }
             };
 
             // Ajout des endpoints Dynamics
@@ -325,7 +311,6 @@ namespace POMsag
                 LoggerService.LogException(ex, "Sauvegarde des préférences de champs");
             }
         }
-
         public void SaveApiConfigurations()
         {
             try
@@ -340,13 +325,15 @@ namespace POMsag
                 configData["ApiConfigurations"]["Apis"] = json;
 
                 parser.WriteFile(CONFIG_FILE, configData);
+
+                LoggerService.Log($"Configurations d'API sauvegardées: {ConfiguredApis.Count} APIs");
             }
             catch (Exception ex)
             {
                 LoggerService.LogException(ex, "Sauvegarde des configurations d'API");
+                throw; // Rethrow to handle it at a higher level
             }
         }
-
         public void AddOrUpdateApi(ApiConfiguration api)
         {
             int index = ConfiguredApis.FindIndex(a => a.ApiId == api.ApiId);

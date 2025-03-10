@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Linq;
 using POMsag.Models;
+using POMsag.Services;
 
 namespace POMsag
 {
@@ -17,7 +18,7 @@ namespace POMsag
             public static Color AccentColor = Color.FromArgb(49, 130, 206);
             public static Color WhiteBackground = Color.White;
             public static Color BorderColor = Color.FromArgb(226, 232, 240);
-            public static Color SecondaryText = Color.FromArgb(113, 128, 150); // Ajout de cette propriété
+            public static Color SecondaryText = Color.FromArgb(113, 128, 150);
         }
 
         private readonly AppConfiguration _configuration;
@@ -29,6 +30,8 @@ namespace POMsag
         private Button buttonAddEndpoint = new Button();
         private Button buttonEditEndpoint = new Button();
         private Button buttonDeleteEndpoint = new Button();
+        private SplitContainer splitContainer;
+        private Button closeButton;
 
         // Labels pour les infos API
         private Label lblApiId = new Label();
@@ -42,6 +45,37 @@ namespace POMsag
             _configuration = configuration;
             InitializeComponent();
             LoadApis();
+        }
+
+        private void ApplySafeSplitterDistance(SplitContainer container)
+        {
+            try
+            {
+                if (container == null || !container.IsHandleCreated || container.Width <= 0)
+                    return;
+
+                // S'assurer que le container a une largeur suffisante
+                if (container.Width <= (container.Panel1MinSize + container.Panel2MinSize + 10))
+                    return;
+
+                // Calculer une valeur sécuritaire
+                int maxPossibleDistance = container.Width - container.Panel2MinSize - 10;
+                int minRequiredDistance = container.Panel1MinSize;
+
+                // Valeur idéale : 50% de la largeur si possible
+                int desiredDistance = container.Width / 2;
+
+                // S'assurer que la valeur reste dans les limites
+                int safeDistance = Math.Max(minRequiredDistance, Math.Min(desiredDistance, maxPossibleDistance));
+
+                // Appliquer la valeur
+                container.SplitterDistance = safeDistance;
+            }
+            catch (Exception ex)
+            {
+                // Journaliser l'erreur ou simplement l'ignorer
+                LoggerService.LogException(ex, "Ajustement du SplitterDistance");
+            }
         }
 
         private void InitializeComponent()
@@ -75,15 +109,12 @@ namespace POMsag
                 TextAlign = ContentAlignment.MiddleLeft
             };
 
-            // Composants principaux
-            var splitContainer = new SplitContainer
+            splitContainer = new SplitContainer
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Vertical,
-                SplitterDistance = 400,
-                BorderStyle = BorderStyle.None,
-                Panel1MinSize = 350,
-                Panel2MinSize = 350
+                BorderStyle = BorderStyle.None
+                // Ne définissez PAS les propriétés Panel1MinSize et Panel2MinSize ici
             };
 
             // ---- SECTION DES API (Panel gauche) ---- //
@@ -323,7 +354,7 @@ namespace POMsag
                 BackColor = ColorPalette.PrimaryBackground
             };
 
-            var closeButton = new Button
+            closeButton = new Button
             {
                 Text = "Fermer",
                 Width = 150,
@@ -369,31 +400,50 @@ namespace POMsag
             this.Controls.Add(titleLabel);
 
             // Gérer le redimensionnement pour les boutons
-            this.Resize += (s, e) =>
-            {
-                closeButton.Location = new Point(bottomPanel.Width - 170, 10);
-            };
+            this.Resize += Form_Resize;
 
-            // Ajuster splitContainer après redimensionnement
-            this.Resize += (s, e) =>
+            // Ajouter l'événement Load
+            this.Load += Form_Load;
+        }
+
+        // Dans ApiManagerForm.cs, modifiez la méthode Form_Load comme ceci:
+        private void Form_Load(object sender, EventArgs e)
+        {
+            // Définir les tailles minimales des panneaux seulement après le chargement
+            splitContainer.Panel1MinSize = 100;
+            splitContainer.Panel2MinSize = 100;
+
+            // Attendre que la manipulation des propriétés du formulaire soit sécuritaire
+            this.BeginInvoke(new Action(() =>
             {
-                if (Width > 1200)
-                    splitContainer.SplitterDistance = Width / 2 - 50;
-                else
-                    this.Load += (s, e) =>
+                try
+                {
+                    // S'assurer que le formulaire est complètement chargé et a une taille
+                    if (splitContainer.Width > 300) // Valeur de sécurité minimale
                     {
-                        // Calculer une distance de séparation sécuritaire
-                        // qui respecte les contraintes Panel1MinSize et Panel2MinSize
                         int safeDistance = Math.Max(
                             splitContainer.Panel1MinSize,
                             Math.Min(
                                 this.Width / 2,
-                                this.Width - splitContainer.Panel2MinSize - 10
+                                this.Width - splitContainer.Panel2MinSize - 50
                             )
                         );
                         splitContainer.SplitterDistance = safeDistance;
-                    };
-            };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Journaliser l'erreur
+                    LoggerService.LogException(ex, "Erreur lors de l'initialisation du SplitterDistance");
+                }
+            }));
+        }
+        private void Form_Resize(object sender, EventArgs e)
+        {
+            if (closeButton != null)
+                closeButton.Location = new Point(closeButton.Parent.Width - 170, 10);
+
+            ApplySafeSplitterDistance(splitContainer);
         }
 
         private void LoadApis()
@@ -486,17 +536,98 @@ namespace POMsag
 
         private void ButtonAddApi_Click(object sender, EventArgs e)
         {
-            // Ouvrir un formulaire pour ajouter une nouvelle API
-            using (var form = new ApiEditForm(null))
+            try
             {
-                if (form.ShowDialog() == DialogResult.OK)
+                // Journalisation du début de l'opération
+                LoggerService.Log("Début de l'ajout d'une nouvelle API");
+
+                // Créer une nouvelle API avec des valeurs par défaut
+                var newApi = new ApiConfiguration(
+                    "new_api_" + DateTime.Now.Ticks.ToString().Substring(0, 8),
+                    "Nouvelle API",
+                    "https://");
+
+                // Journalisation de la création de l'objet API
+                LoggerService.Log($"Nouvelle API créée temporairement: ID={newApi.ApiId}, Nom={newApi.Name}");
+
+                // Ouvrir le formulaire d'édition pour cette nouvelle API
+                using (var form = new ApiEditForm(newApi))
                 {
-                    _configuration.AddOrUpdateApi(form.ApiConfig);
-                    LoadApis();
+                    LoggerService.Log("Ouverture du formulaire d'édition d'API");
+
+                    DialogResult result = form.ShowDialog();
+
+                    LoggerService.Log($"Résultat du dialogue: {result}");
+
+                    if (result == DialogResult.OK)
+                    {
+                        // Vérifier si l'API a été correctement configurée
+                        if (string.IsNullOrWhiteSpace(form.ApiConfig.ApiId) ||
+                            string.IsNullOrWhiteSpace(form.ApiConfig.Name) ||
+                            string.IsNullOrWhiteSpace(form.ApiConfig.BaseUrl))
+                        {
+                            LoggerService.Log("API mal configurée: champs obligatoires manquants");
+
+                            MessageBox.Show(
+                                "L'API n'a pas été correctement configurée. Assurez-vous de remplir tous les champs obligatoires.",
+                                "Configuration incomplète",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // Vérifier que l'API ID est unique
+                        if (_configuration.ConfiguredApis.Any(a => a.ApiId == form.ApiConfig.ApiId))
+                        {
+                            LoggerService.Log($"ID d'API en double: {form.ApiConfig.ApiId}");
+
+                            MessageBox.Show(
+                                "Un API avec cet identifiant existe déjà. Veuillez utiliser un identifiant unique.",
+                                "ID en double",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning);
+                            return;
+                        }
+
+                        // Ajouter l'API à la configuration
+                        LoggerService.Log($"Ajout de l'API à la configuration: {form.ApiConfig.ApiId}");
+                        _configuration.AddOrUpdateApi(form.ApiConfig);
+
+                        // Recharger la liste des API
+                        LoggerService.Log("Rechargement de la liste des APIs");
+                        LoadApis();
+
+                        // Sélectionner la nouvelle API
+                        int index = comboApis.Items.IndexOf(form.ApiConfig.Name);
+                        LoggerService.Log($"Index de la nouvelle API dans la liste: {index}");
+
+                        if (index >= 0)
+                            comboApis.SelectedIndex = index;
+
+                        LoggerService.Log($"API ajoutée avec succès: {form.ApiConfig.Name}");
+
+                        MessageBox.Show(
+                            $"L'API '{form.ApiConfig.Name}' a été ajoutée avec succès.",
+                            "Succès",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        LoggerService.Log("Ajout d'API annulé par l'utilisateur");
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "Erreur lors de l'ajout d'une nouvelle API");
+                MessageBox.Show(
+                    $"Une erreur s'est produite lors de l'ajout de l'API: {ex.Message}",
+                    "Erreur",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
-
         private void ButtonEditApi_Click(object sender, EventArgs e)
         {
             if (comboApis.SelectedIndex < 0)

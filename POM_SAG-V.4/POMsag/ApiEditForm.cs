@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using POMsag.Models;
+using POMsag.Services;
 using System.Collections.Generic;
 using System.ComponentModel;
 
@@ -384,6 +385,14 @@ namespace POMsag
                         ApiConfig.AuthParameters["Password"] = passwordTextBox.Text;
                     break;
             }
+
+            // Ajouter des journalisations pour le débogage
+            LoggerService.Log($"API sauvegardée: ID={ApiConfig.ApiId}, Nom={ApiConfig.Name}, URL={ApiConfig.BaseUrl}");
+            LoggerService.Log($"Type d'authentification: {ApiConfig.AuthType}");
+            LoggerService.Log($"Nombre de paramètres d'authentification: {ApiConfig.AuthParameters.Count}");
+
+            // Définir le DialogResult à OK pour fermer le formulaire
+            this.DialogResult = DialogResult.OK;
         }
     }
 }

@@ -438,7 +438,17 @@ namespace POMsag
 
                 ShowStatus($"Récupération des données depuis {api.Name} ({endpointName})...");
 
-                data = await _genericApiService.FetchDataAsync(apiId, endpointName, startDate, endDate);
+                // Ajout de gestion d'erreur supplémentaire
+                try
+                {
+                    data = await _genericApiService.FetchDataAsync(apiId, endpointName, startDate, endDate);
+                }
+                catch (Exception fetchEx)
+                {
+                    ShowStatus($"Erreur lors de la récupération des données : {fetchEx.Message}");
+                    LoggerService.LogException(fetchEx, $"Récupération des données {endpointName}");
+                    throw;
+                }
 
                 ShowStatus($"Récupération terminée. {data.Count} enregistrements trouvés.");
 

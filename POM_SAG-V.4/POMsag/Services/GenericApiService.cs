@@ -66,136 +66,175 @@ namespace POMsag.Services
             if (endpoint == null)
                 throw new ArgumentException($"Endpoint non trouvé: {endpointName}");
 
-            // Obtenir le client HTTP pour cette API
-            if (!_httpClients.TryGetValue(apiId, out HttpClient client))
+            try
             {
-                // Créer un nouveau client si nécessaire
-                client = new HttpClient { BaseAddress = new Uri(api.BaseUrl) };
-                _httpClients[apiId] = client;
-            }
+                LoggerService.Log($"Début FetchDataAsync - ApiId: {apiId}, Endpoint: {endpointName}");
+                LoggerService.Log($"Configuration API : {JsonSerializer.Serialize(api)}");
 
-            // Gérer l'authentification pour cette API
-            await HandleAuthenticationAsync(api, client);
-
-            // Construire l'URL avec les paramètres de date si nécessaire
-            string url = endpoint.Path;
-
-            if (endpoint.SupportsDateFiltering && startDate.HasValue && endDate.HasValue)
-            {
-                // Formater l'URL selon l'API
-                if (api.ApiId == "dynamics")
+                // Configuration du client HTTP avec gestion des certificats
+                var handler = new HttpClientHandler
                 {
-                    // Format spécifique pour Dynamics 365 OData
-                    string formattedStartDate = startDate.Value.ToString(endpoint.DateFormat);
-                    string formattedEndDate = endDate.Value.ToString(endpoint.DateFormat);
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
 
-                    // Pour OData, les filtres sont ajoutés avec $filter=
-                    url += $"?cross-company=true&$filter={endpoint.DateStartParamName} {formattedStartDate} and {endpoint.DateEndParamName} {formattedEndDate}";
+                using var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(api.BaseUrl)
+                };
 
-                    // Ajouter la limite si configurée
-                    if (api.ApiId == "dynamics" && int.TryParse(_configuration.MaxRecords.ToString(), out int maxRecords) && maxRecords > 0)
-                    {
-                        url += $"&$top={maxRecords}";
-                    }
+                // Authentification
+                await HandleAuthenticationAsync(api, client);
+
+                // Construction de l'URL
+                string url = endpoint.Path;
+
+                // Ajout des paramètres
+                var queryParams = new List<string>();
+
+                // Filtres de date
+                if (startDate.HasValue && endDate.HasValue && endpoint.SupportsDateFiltering)
+                {
+                    var startDateStr = startDate.Value.ToString(endpoint.DateFormat);
+                    var endDateStr = endDate.Value.ToString(endpoint.DateFormat);
+
+                    queryParams.Add($"$filter=PurchasePriceDate ge {startDateStr} and PurchasePriceDate le {endDateStr}");
                 }
-                else
+
+                // Limite des enregistrements
+                queryParams.Add($"$top={_configuration.MaxRecords}");
+
+                // Ajout des paramètres cross-company pour Dynamics
+                if (apiId == "dynamics")
                 {
-                    // Format par défaut pour les API REST standard
-                    string formattedStartDate = startDate.Value.ToString(endpoint.DateFormat);
-                    string formattedEndDate = endDate.Value.ToString(endpoint.DateFormat);
-
-                    // Ajouter les paramètres à l'URL
-                    string startParamName = !string.IsNullOrEmpty(endpoint.DateStartParamName) ? endpoint.DateStartParamName : "startDate";
-                    string endParamName = !string.IsNullOrEmpty(endpoint.DateEndParamName) ? endpoint.DateEndParamName : "endDate";
-
-                    // Vérifier si l'URL contient déjà des paramètres
-                    if (url.Contains("?"))
-                        url += $"&{startParamName}={formattedStartDate}&{endParamName}={formattedEndDate}";
-                    else
-                        url += $"?{startParamName}={formattedStartDate}&{endParamName}={formattedEndDate}";
+                    queryParams.Insert(0, "cross-company=true");
                 }
-            }
 
-            LoggerService.Log($"Requête vers {api.Name} ({endpoint.Name}): {url}");
-
-            // Exécuter la requête
-            var response = await client.GetAsync(url);
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            LoggerService.Log($"Réponse reçue ({content.Length} caractères)");
-
-            // Traiter la réponse selon le format attendu
-            if (api.ApiId == "dynamics")
-            {
-                // Dynamics 365 retourne les données dans un objet value
-                using (JsonDocument doc = JsonDocument.Parse(content))
+                // Ajout des paramètres à l'URL
+                if (queryParams.Any())
                 {
-                    if (doc.RootElement.TryGetProperty("value", out JsonElement valueElement))
+                    url += "?" + string.Join("&", queryParams);
+                }
+
+                LoggerService.Log($"URL de requête complète : {url}");
+
+                // Configuration des en-têtes
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                // Exécution de la requête
+                var response = await client.GetAsync(url);
+
+                // Vérification de la réponse
+                var content = await response.Content.ReadAsStringAsync();
+
+                LoggerService.Log($"Statut de la réponse : {response.StatusCode}");
+                LoggerService.Log($"Contenu de la réponse (début) : {content.Substring(0, Math.Min(500, content.Length))}");
+
+                response.EnsureSuccessStatusCode();
+
+                // Options de désérialisation flexibles
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip
+                };
+
+                // Gestion spécifique pour Dynamics
+                if (apiId == "dynamics")
+                {
+                    try
                     {
-                        var options = new JsonSerializerOptions
+                        using (var doc = JsonDocument.Parse(content))
                         {
-                            PropertyNameCaseInsensitive = true
-                        };
+                            if (doc.RootElement.TryGetProperty("value", out JsonElement valueElement))
+                            {
+                                var items = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                                    valueElement.GetRawText(),
+                                    options
+                                ) ?? new List<Dictionary<string, object>>();
 
-                        var items = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                            valueElement.GetRawText(),
-                            options
-                        );
-
-                        return items ?? new List<Dictionary<string, object>>();
+                                LoggerService.Log($"Nombre d'éléments récupérés : {items.Count}");
+                                return items;
+                            }
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        LoggerService.LogException(ex, "Erreur lors de la désérialisation JSON Dynamics");
+                        LoggerService.Log($"Contenu problématique (début) : {content.Substring(0, Math.Min(1000, content.Length))}");
+                        throw;
                     }
                 }
+
+                // Désérialisation standard
+                var result = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content, options)
+                             ?? new List<Dictionary<string, object>>();
+
+                LoggerService.Log($"Nombre d'éléments récupérés : {result.Count}");
+                return result;
             }
-
-            // Format standard pour les autres API
-            var result = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-            );
-
-            return result ?? new List<Dictionary<string, object>>();
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, $"Erreur complète lors du transfert de données pour {apiId}/{endpointName}");
+                throw;
+            }
         }
-
         private async Task HandleAuthenticationAsync(ApiConfiguration api, HttpClient client)
         {
             // Authentification OAuth2 pour Dynamics 365
             if (api.AuthType == AuthenticationType.OAuth2ClientCredentials)
             {
-                // Vérifier si nous avons déjà un token valide
-                if (_accessTokens.TryGetValue(api.ApiId, out string token) &&
-                    _tokenExpiryTimes.TryGetValue(api.ApiId, out DateTime expiry) &&
-                    DateTime.Now < expiry)
+                try
                 {
-                    // Utiliser le token existant
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    return;
-                }
+                    // Logging des détails d'authentification
+                    LoggerService.Log("Début de l'authentification OAuth2");
+                    LoggerService.Log($"Paramètres OAuth : " +
+                        $"TokenUrl={api.AuthParameters["TokenUrl"]}, " +
+                        $"ClientId={api.AuthParameters["ClientId"]}, " +
+                        $"Resource={api.AuthParameters["Resource"]}");
 
-                // Obtenir un nouveau token
-                if (api.AuthParameters.TryGetValue("TokenUrl", out string tokenUrl) &&
-                    api.AuthParameters.TryGetValue("ClientId", out string clientId) &&
-                    api.AuthParameters.TryGetValue("ClientSecret", out string clientSecret) &&
-                    api.AuthParameters.TryGetValue("Resource", out string resource))
-                {
+                    // Vérifier si nous avons déjà un token valide
+                    if (_accessTokens.TryGetValue(api.ApiId, out string token) &&
+                        _tokenExpiryTimes.TryGetValue(api.ApiId, out DateTime expiry) &&
+                        DateTime.Now < expiry)
+                    {
+                        LoggerService.Log("Utilisation du token existant");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        return;
+                    }
+
+                    // Obtenir un nouveau token
+                    var tokenUrl = api.AuthParameters["TokenUrl"];
+                    var clientId = api.AuthParameters["ClientId"];
+                    var clientSecret = api.AuthParameters["ClientSecret"];
+                    var resource = api.AuthParameters["Resource"];
+
                     using var tokenClient = new HttpClient();
 
                     var values = new Dictionary<string, string>
-                    {
-                        { "client_id", clientId },
-                        { "client_secret", clientSecret },
-                        { "grant_type", "client_credentials" },
-                        { "resource", resource }
-                    };
+            {
+                { "client_id", clientId },
+                { "client_secret", clientSecret },
+                { "grant_type", "client_credentials" },
+                { "resource", resource }
+            };
 
+                    LoggerService.Log("Envoi de la requête de token OAuth");
                     var tokenResponse = await tokenClient.PostAsync(tokenUrl, new FormUrlEncodedContent(values));
+
+                    // Vérification de la réponse
+                    var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+                    LoggerService.Log($"Réponse du token (début) : {tokenContent.Substring(0, Math.Min(500, tokenContent.Length))}");
+
                     tokenResponse.EnsureSuccessStatusCode();
 
-                    var tokenJson = await tokenResponse.Content.ReadAsStringAsync();
+                    var tokenJson = tokenContent;
                     using var tokenDoc = JsonDocument.Parse(tokenJson);
 
                     token = tokenDoc.RootElement.GetProperty("access_token").GetString();
 
+                    // Gestion de l'expiration du token
                     var expiresIn = 3600; // Valeur par défaut (1 heure)
                     if (tokenDoc.RootElement.TryGetProperty("expires_in", out JsonElement expiresInEl))
                     {
@@ -209,10 +248,28 @@ namespace POMsag.Services
                         }
                     }
 
+                    // Mise à jour du token
                     _accessTokens[api.ApiId] = token;
                     _tokenExpiryTimes[api.ApiId] = DateTime.Now.AddSeconds(expiresIn - 300); // 5 minutes de marge
 
+                    // Ajout du token à l'en-tête
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    LoggerService.Log("Authentification OAuth2 réussie");
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.LogException(ex, "Erreur lors de l'authentification OAuth2");
+                    throw;
+                }
+            }
+            else if (api.AuthType == AuthenticationType.ApiKey)
+            {
+                // Authentification par clé API
+                if (api.AuthParameters.TryGetValue("HeaderName", out string headerName) &&
+                    api.AuthParameters.TryGetValue("Value", out string value))
+                {
+                    client.DefaultRequestHeaders.Add(headerName, value);
                 }
             }
             else if (api.AuthType == AuthenticationType.Basic)
