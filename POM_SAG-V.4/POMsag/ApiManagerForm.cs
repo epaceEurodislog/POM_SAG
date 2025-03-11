@@ -541,14 +541,44 @@ namespace POMsag
                 // Journalisation du début de l'opération
                 LoggerService.Log("Début de l'ajout d'une nouvelle API");
 
-                // Créer une nouvelle API avec des valeurs par défaut
+                // Créer une nouvelle API avec des valeurs par défaut détaillées
                 var newApi = new ApiConfiguration(
                     "new_api_" + DateTime.Now.Ticks.ToString().Substring(0, 8),
                     "Nouvelle API",
-                    "https://");
+                    "https://")
+                {
+                    // Configuration par défaut pour faciliter le débogage
+                    AuthType = AuthenticationType.OAuth2ClientCredentials,
+                    AuthParameters = new Dictionary<string, string>
+            {
+                { "TokenUrl", "https://login.microsoftonline.com/VOTRE_TENANT_ID/oauth2/token" },
+                { "ClientId", "" },
+                { "ClientSecret", "" },
+                { "Resource", "https://VOTRE_ENVIRONNEMENT.operations.dynamics.com/" }
+            }
+                };
+
+                // Ajouter un endpoint par défaut
+                newApi.Endpoints.Add(new ApiEndpoint("ReleasedProductsV2", "ReleasedProductsV2")
+                {
+                    SupportsDateFiltering = true,
+                    DateStartParamName = "PurchasePriceDate ge",
+                    DateEndParamName = "PurchasePriceDate le",
+                    DateFormat = "yyyy-MM-ddTHH:mm:ssZ"
+                });
 
                 // Journalisation de la création de l'objet API
                 LoggerService.Log($"Nouvelle API créée temporairement: ID={newApi.ApiId}, Nom={newApi.Name}");
+                LoggerService.Log($"Configuration initiale de l'API :");
+                LoggerService.Log($"Base URL: {newApi.BaseUrl}");
+                LoggerService.Log($"Auth Type: {newApi.AuthType}");
+
+                foreach (var param in newApi.AuthParameters)
+                {
+                    // Masquer les secrets
+                    string value = param.Key.Contains("Secret") ? "[MASQUÉ]" : param.Value;
+                    LoggerService.Log($"Param {param.Key}: {value}");
+                }
 
                 // Ouvrir le formulaire d'édition pour cette nouvelle API
                 using (var form = new ApiEditForm(newApi))
@@ -561,7 +591,7 @@ namespace POMsag
 
                     if (result == DialogResult.OK)
                     {
-                        // Vérifier si l'API a été correctement configurée
+                        // Vérification des champs obligatoires
                         if (string.IsNullOrWhiteSpace(form.ApiConfig.ApiId) ||
                             string.IsNullOrWhiteSpace(form.ApiConfig.Name) ||
                             string.IsNullOrWhiteSpace(form.ApiConfig.BaseUrl))
@@ -576,7 +606,7 @@ namespace POMsag
                             return;
                         }
 
-                        // Vérifier que l'API ID est unique
+                        // Vérifier l'unicité de l'ID d'API
                         if (_configuration.ConfiguredApis.Any(a => a.ApiId == form.ApiConfig.ApiId))
                         {
                             LoggerService.Log($"ID d'API en double: {form.ApiConfig.ApiId}");
@@ -589,32 +619,24 @@ namespace POMsag
                             return;
                         }
 
-                        // Ajouter l'API à la configuration
+                        // Ajout de l'API avec journalisation détaillée
                         LoggerService.Log($"Ajout de l'API à la configuration: {form.ApiConfig.ApiId}");
                         _configuration.AddOrUpdateApi(form.ApiConfig);
 
+                        // Journalisation des détails de l'API ajoutée
+                        LoggerService.Log($"Détails de l'API ajoutée :");
+                        LoggerService.Log($"Base URL: {form.ApiConfig.BaseUrl}");
+                        LoggerService.Log($"Auth Type: {form.ApiConfig.AuthType}");
+                        LoggerService.Log($"Nombre d'endpoints: {form.ApiConfig.Endpoints.Count}");
+
                         // Recharger la liste des API
-                        LoggerService.Log("Rechargement de la liste des APIs");
                         LoadApis();
-
-                        // Sélectionner la nouvelle API
-                        int index = comboApis.Items.IndexOf(form.ApiConfig.Name);
-                        LoggerService.Log($"Index de la nouvelle API dans la liste: {index}");
-
-                        if (index >= 0)
-                            comboApis.SelectedIndex = index;
-
-                        LoggerService.Log($"API ajoutée avec succès: {form.ApiConfig.Name}");
 
                         MessageBox.Show(
                             $"L'API '{form.ApiConfig.Name}' a été ajoutée avec succès.",
                             "Succès",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        LoggerService.Log("Ajout d'API annulé par l'utilisateur");
                     }
                 }
             }

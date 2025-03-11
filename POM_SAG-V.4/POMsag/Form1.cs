@@ -713,5 +713,21 @@ namespace POMsag
                 throw;
             }
         }
+
+        private async void TestApiConnectionButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var apiId = comboBoxApi.SelectedItem.ToString();
+                var endpointName = comboBoxTables.SelectedItem.ToString();
+
+                string result = await _genericApiService.TestApiConnectionAsync(apiId, endpointName);
+                MessageBox.Show($"Réponse de l'API :\n{result}", "Test de connexion");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur : {ex.Message}", "Erreur de connexion");
+            }
+        }
     }
 }

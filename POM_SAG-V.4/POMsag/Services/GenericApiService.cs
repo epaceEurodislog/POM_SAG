@@ -1,4 +1,3 @@
-// Fichier: POMsag/Services/GenericApiService.cs
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -7,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using POMsag.Models;
+using POMsag.Services;
 
 namespace POMsag.Services
 {
@@ -29,14 +29,19 @@ namespace POMsag.Services
 
             foreach (var api in _configuration.ConfiguredApis)
             {
+                LoggerService.Log($"Initialisation du client HTTP pour l'API : {api.Name}");
+                LoggerService.Log($"BaseURL: {api.BaseUrl}");
+                LoggerService.Log($"Type d'authentification: {api.AuthType}");
+
                 var client = new HttpClient
                 {
                     BaseAddress = new Uri(api.BaseUrl)
                 };
 
                 // Configurer les en-têtes par défaut
-                foreach (var header in api.Headers)
+                foreach (var header in api.Headers ?? new Dictionary<string, string>())
                 {
+                    LoggerService.Log($"Ajout de l'en-tête : {header.Key} = {header.Value}");
                     client.DefaultRequestHeaders.Add(header.Key, header.Value);
                 }
 
@@ -46,6 +51,7 @@ namespace POMsag.Services
                     if (api.AuthParameters.TryGetValue("HeaderName", out string headerName) &&
                         api.AuthParameters.TryGetValue("Value", out string value))
                     {
+                        LoggerService.Log($"Ajout de l'en-tête d'authentification : {headerName}");
                         client.DefaultRequestHeaders.Add(headerName, value);
                     }
                 }
@@ -54,23 +60,40 @@ namespace POMsag.Services
             }
         }
 
-        public async Task<List<Dictionary<string, object>>> FetchDataAsync(string apiId, string endpointName,
-                                                                           DateTime? startDate = null,
-                                                                           DateTime? endDate = null)
+        public async Task<List<Dictionary<string, object>>> FetchDataAsync(
+            string apiId,
+            string endpointName,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
         {
+            LoggerService.Log("-------- DÉBUT DE FETCHDATAASYNC --------");
+            LoggerService.Log($"Paramètres de la requête :");
+            LoggerService.Log($"API ID: {apiId}");
+            LoggerService.Log($"Endpoint: {endpointName}");
+            LoggerService.Log($"Date de début: {startDate}");
+            LoggerService.Log($"Date de fin: {endDate}");
+
             var api = _configuration.GetApiById(apiId);
             if (api == null)
+            {
+                LoggerService.Log($"ERREUR : API non trouvée pour l'ID {apiId}");
                 throw new ArgumentException($"API non trouvée: {apiId}");
+            }
 
             var endpoint = api.Endpoints.Find(e => e.Name == endpointName);
             if (endpoint == null)
+            {
+                LoggerService.Log($"ERREUR : Endpoint non trouvé pour {endpointName}");
                 throw new ArgumentException($"Endpoint non trouvé: {endpointName}");
+            }
+
+            LoggerService.Log($"Détails de l'endpoint :");
+            LoggerService.Log($"Chemin: {endpoint.Path}");
+            LoggerService.Log($"Méthode: {endpoint.Method}");
+            LoggerService.Log($"Supporte filtrage par date: {endpoint.SupportsDateFiltering}");
 
             try
             {
-                LoggerService.Log($"Début FetchDataAsync - ApiId: {apiId}, Endpoint: {endpointName}");
-                LoggerService.Log($"Configuration API : {JsonSerializer.Serialize(api)}");
-
                 // Configuration du client HTTP avec gestion des certificats
                 var handler = new HttpClientHandler
                 {
@@ -97,11 +120,17 @@ namespace POMsag.Services
                     var startDateStr = startDate.Value.ToString(endpoint.DateFormat);
                     var endDateStr = endDate.Value.ToString(endpoint.DateFormat);
 
+                    LoggerService.Log($"Filtrage par date activé :");
+                    LoggerService.Log($"Date de début formatée: {startDateStr}");
+                    LoggerService.Log($"Date de fin formatée: {endDateStr}");
+
                     queryParams.Add($"$filter=PurchasePriceDate ge {startDateStr} and PurchasePriceDate le {endDateStr}");
                 }
 
                 // Limite des enregistrements
-                queryParams.Add($"$top={_configuration.MaxRecords}");
+                int maxRecords = _configuration.MaxRecords > 0 ? _configuration.MaxRecords : 500;
+                queryParams.Add($"$top={maxRecords}");
+                LoggerService.Log($"Nombre maximal d'enregistrements : {maxRecords}");
 
                 // Ajout des paramètres cross-company pour Dynamics
                 if (apiId == "dynamics")
@@ -117,19 +146,40 @@ namespace POMsag.Services
 
                 LoggerService.Log($"URL de requête complète : {url}");
 
-                // Configuration des en-têtes
+                // Préparation des en-têtes
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-                // Exécution de la requête
-                var response = await client.GetAsync(url);
+                // Journalisation des en-têtes
+                LoggerService.Log("En-têtes de la requête :");
+                foreach (var header in client.DefaultRequestHeaders)
+                {
+                    LoggerService.Log($"{header.Key}: {string.Join(", ", header.Value)}");
+                }
 
-                // Vérification de la réponse
+                // Exécution de la requête
+                HttpResponseMessage response;
+                try
+                {
+                    response = await client.GetAsync(url);
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"ERREUR lors de l'appel API : {ex.Message}");
+                    LoggerService.LogException(ex, "Erreur d'appel API");
+                    throw;
+                }
+
+                // Lecture du contenu
                 var content = await response.Content.ReadAsStringAsync();
 
+                // Journalisation détaillée de la réponse
                 LoggerService.Log($"Statut de la réponse : {response.StatusCode}");
-                LoggerService.Log($"Contenu de la réponse (début) : {content.Substring(0, Math.Min(500, content.Length))}");
+                LoggerService.Log($"Type de contenu : {response.Content.Headers.ContentType}");
+                LoggerService.Log($"Longueur du contenu : {content.Length} caractères");
+                LoggerService.Log($"Début du contenu (500 premiers caractères) :\n{content.Substring(0, Math.Min(500, content.Length))}");
 
+                // Vérification du succès de la requête
                 response.EnsureSuccessStatusCode();
 
                 // Options de désérialisation flexibles
@@ -155,14 +205,20 @@ namespace POMsag.Services
                                 ) ?? new List<Dictionary<string, object>>();
 
                                 LoggerService.Log($"Nombre d'éléments récupérés : {items.Count}");
+                                LoggerService.Log("-------- FIN DE FETCHDATAASYNC --------");
                                 return items;
+                            }
+                            else
+                            {
+                                LoggerService.Log("ERREUR : Propriété 'value' non trouvée dans la réponse JSON Dynamics");
+                                throw new Exception("Format de réponse Dynamics invalide");
                             }
                         }
                     }
                     catch (JsonException ex)
                     {
                         LoggerService.LogException(ex, "Erreur lors de la désérialisation JSON Dynamics");
-                        LoggerService.Log($"Contenu problématique (début) : {content.Substring(0, Math.Min(1000, content.Length))}");
+                        LoggerService.Log($"Contenu problématique :\n{content}");
                         throw;
                     }
                 }
@@ -172,6 +228,7 @@ namespace POMsag.Services
                              ?? new List<Dictionary<string, object>>();
 
                 LoggerService.Log($"Nombre d'éléments récupérés : {result.Count}");
+                LoggerService.Log("-------- FIN DE FETCHDATAASYNC (Standard) --------");
                 return result;
             }
             catch (Exception ex)
@@ -180,19 +237,37 @@ namespace POMsag.Services
                 throw;
             }
         }
+
         private async Task HandleAuthenticationAsync(ApiConfiguration api, HttpClient client)
         {
-            // Authentification OAuth2 pour Dynamics 365
+            LoggerService.Log("-------- DÉBUT DE L'AUTHENTIFICATION --------");
+            LoggerService.Log($"Type d'authentification : {api.AuthType}");
+
             if (api.AuthType == AuthenticationType.OAuth2ClientCredentials)
             {
                 try
                 {
-                    // Logging des détails d'authentification
-                    LoggerService.Log("Début de l'authentification OAuth2");
-                    LoggerService.Log($"Paramètres OAuth : " +
-                        $"TokenUrl={api.AuthParameters["TokenUrl"]}, " +
-                        $"ClientId={api.AuthParameters["ClientId"]}, " +
-                        $"Resource={api.AuthParameters["Resource"]}");
+                    // Vérifier que tous les paramètres requis sont présents
+                    string[] requiredParams = { "TokenUrl", "ClientId", "ClientSecret", "Resource" };
+                    foreach (var param in requiredParams)
+                    {
+                        if (!api.AuthParameters.ContainsKey(param))
+                        {
+                            LoggerService.Log($"ERREUR : Paramètre OAuth {param} manquant");
+                            throw new ArgumentException($"Paramètre OAuth {param} manquant dans la configuration");
+                        }
+                    }
+
+                    // Extraction des paramètres
+                    var tokenUrl = api.AuthParameters["TokenUrl"];
+                    var clientId = api.AuthParameters["ClientId"];
+                    var clientSecret = api.AuthParameters["ClientSecret"];
+                    var resource = api.AuthParameters["Resource"];
+
+                    LoggerService.Log($"Détails OAuth :");
+                    LoggerService.Log($"Token URL : {tokenUrl}");
+                    LoggerService.Log($"Client ID : {clientId}");
+                    LoggerService.Log($"Resource : {resource}");
 
                     // Vérifier si nous avons déjà un token valide
                     if (_accessTokens.TryGetValue(api.ApiId, out string token) &&
@@ -204,12 +279,9 @@ namespace POMsag.Services
                         return;
                     }
 
-                    // Obtenir un nouveau token
-                    var tokenUrl = api.AuthParameters["TokenUrl"];
-                    var clientId = api.AuthParameters["ClientId"];
-                    var clientSecret = api.AuthParameters["ClientSecret"];
-                    var resource = api.AuthParameters["Resource"];
+                    LoggerService.Log("Demande d'un nouveau token OAuth");
 
+                    // Préparation de la requête de token
                     using var tokenClient = new HttpClient();
 
                     var values = new Dictionary<string, string>
@@ -220,18 +292,22 @@ namespace POMsag.Services
                 { "resource", resource }
             };
 
-                    LoggerService.Log("Envoi de la requête de token OAuth");
+                    // Envoi de la requête
                     var tokenResponse = await tokenClient.PostAsync(tokenUrl, new FormUrlEncodedContent(values));
 
-                    // Vérification de la réponse
+                    // Lecture du contenu de la réponse
                     var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
-                    LoggerService.Log($"Réponse du token (début) : {tokenContent.Substring(0, Math.Min(500, tokenContent.Length))}");
 
+                    LoggerService.Log($"Statut de la réponse du token : {tokenResponse.StatusCode}");
+                    LoggerService.Log($"Début du contenu de la réponse : {tokenContent.Substring(0, Math.Min(500, tokenContent.Length))}");
+
+                    // Vérification du succès de la requête
                     tokenResponse.EnsureSuccessStatusCode();
 
-                    var tokenJson = tokenContent;
-                    using var tokenDoc = JsonDocument.Parse(tokenJson);
+                    // Analyse du token
+                    using var tokenDoc = JsonDocument.Parse(tokenContent);
 
+                    // Extraction du token d'accès
                     token = tokenDoc.RootElement.GetProperty("access_token").GetString();
 
                     // Gestion de l'expiration du token
@@ -255,32 +331,87 @@ namespace POMsag.Services
                     // Ajout du token à l'en-tête
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    LoggerService.Log("Authentification OAuth2 réussie");
+                    LoggerService.Log($"Authentification OAuth2 réussie pour {api.Name}");
+                    LoggerService.Log($"Nouveau token valide jusqu'à : {_tokenExpiryTimes[api.ApiId]}");
+                    LoggerService.Log("-------- FIN DE L'AUTHENTIFICATION --------");
                 }
                 catch (Exception ex)
                 {
-                    LoggerService.LogException(ex, "Erreur lors de l'authentification OAuth2");
+                    LoggerService.LogException(ex, $"Erreur lors de l'authentification OAuth2 pour {api.Name}");
                     throw;
                 }
             }
-            else if (api.AuthType == AuthenticationType.ApiKey)
+            else
             {
-                // Authentification par clé API
-                if (api.AuthParameters.TryGetValue("HeaderName", out string headerName) &&
-                    api.AuthParameters.TryGetValue("Value", out string value))
-                {
-                    client.DefaultRequestHeaders.Add(headerName, value);
-                }
+                LoggerService.Log($"Type d'authentification non géré : {api.AuthType}");
+                LoggerService.Log("-------- FIN DE L'AUTHENTIFICATION --------");
             }
-            else if (api.AuthType == AuthenticationType.Basic)
+        }
+
+        public async Task<string> TestApiConnectionAsync(string apiId, string endpointName)
+        {
+            try
             {
-                // Authentification HTTP Basic
-                if (api.AuthParameters.TryGetValue("Username", out string username) &&
-                    api.AuthParameters.TryGetValue("Password", out string password))
+                LoggerService.Log($"Test de connexion pour API: {apiId}, Endpoint: {endpointName}");
+
+                var api = _configuration.GetApiById(apiId);
+                if (api == null)
+                    throw new ArgumentException($"API non trouvée: {apiId}");
+
+                var endpoint = api.Endpoints.Find(e => e.Name == endpointName);
+                if (endpoint == null)
+                    throw new ArgumentException($"Endpoint non trouvé: {endpointName}");
+
+                var handler = new HttpClientHandler
                 {
-                    var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+
+                using var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(api.BaseUrl)
+                };
+
+                // Authentification
+                await HandleAuthenticationAsync(api, client);
+
+                // Construire l'URL complète
+                string url = endpoint.Path;
+
+                // Ajouter des paramètres si nécessaire
+                var queryParams = new List<string>
+        {
+            "cross-company=true",
+            "$top=10"
+        };
+
+                if (queryParams.Any())
+                {
+                    url += "?" + string.Join("&", queryParams);
                 }
+
+                LoggerService.Log($"URL de test : {url}");
+
+                // Exécuter la requête
+                var response = await client.GetAsync(url);
+
+                // Lire le contenu
+                var content = await response.Content.ReadAsStringAsync();
+
+                LoggerService.Log($"Statut de la réponse : {response.StatusCode}");
+                LoggerService.Log($"Type de contenu : {response.Content.Headers.ContentType}");
+                LoggerService.Log($"Longueur du contenu : {content.Length} caractères");
+                LoggerService.Log($"Début du contenu (500 premiers caractères) :\n{content.Substring(0, Math.Min(500, content.Length))}");
+
+                // Vérifier le succès de la requête
+                response.EnsureSuccessStatusCode();
+
+                return content;
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "Erreur lors du test de connexion API");
+                throw;
             }
         }
     }
