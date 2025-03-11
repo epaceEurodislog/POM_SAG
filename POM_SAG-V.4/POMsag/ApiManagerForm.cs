@@ -113,48 +113,55 @@ namespace POMsag
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Vertical,
-                BorderStyle = BorderStyle.None
-                // Ne définissez PAS les propriétés Panel1MinSize et Panel2MinSize ici
+                BorderStyle = BorderStyle.None,
+                Panel1MinSize = 100,
+                Panel2MinSize = 100,
+                SplitterDistance = 450  // Définir la distance du séparateur
             };
 
             // ---- SECTION DES API (Panel gauche) ---- //
 
-            // Panel pour la liste des API
-            var apiPanel = new Panel
+            // Créer un TableLayoutPanel pour organiser le contenu du panneau gauche
+            var apiTableLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 4,
                 Padding = new Padding(10),
                 BackColor = ColorPalette.WhiteBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
 
+            // Définir la hauteur des lignes
+            apiTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Label
+            apiTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); // ComboBox
+            apiTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 200)); // Info Panel
+            apiTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // Buttons
+
             var apiLabel = new Label
             {
                 Text = "API configurées :",
-                Dock = DockStyle.Top,
-                Height = 30,
+                Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 ForeColor = ColorPalette.PrimaryText
             };
 
             comboApis = new ComboBox
             {
-                Dock = DockStyle.Top,
+                Dock = DockStyle.Fill,
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 BackColor = ColorPalette.SecondaryBackground,
                 ForeColor = ColorPalette.PrimaryText,
-                Height = 30,
-                Margin = new Padding(0, 10, 0, 10)
+                Margin = new Padding(0, 5, 0, 10)
             };
             comboApis.SelectedIndexChanged += ComboApis_SelectedIndexChanged;
 
             // Panel d'informations de l'API sélectionnée
             var apiInfoPanel = new Panel
             {
-                Dock = DockStyle.Top,
-                Height = 180,
+                Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.None,
-                Margin = new Padding(0, 10, 0, 0)
+                Margin = new Padding(0, 5, 0, 10)
             };
 
             var apiInfoTitle = new Label
@@ -202,14 +209,13 @@ namespace POMsag
             apiInfoPanel.Controls.Add(apiInfoContent);
             apiInfoPanel.Controls.Add(apiInfoTitle);
 
-            // Boutons pour les API - Modification pour rendre les boutons visibles
-            var apiButtonsPanel = new Panel
+            // Boutons pour les API
+            var apiButtonsPanel = new FlowLayoutPanel
             {
-                Dock = DockStyle.Top, // Changé de Bottom à Top
-                Height = 60,
-                Padding = new Padding(10),
-                BackColor = ColorPalette.SecondaryBackground, // Couleur de fond pour les distinguer
-                Margin = new Padding(0, 0, 0, 10)
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                Padding = new Padding(0),
+                BackColor = ColorPalette.SecondaryBackground
             };
 
             buttonAddApi = new Button
@@ -220,7 +226,7 @@ namespace POMsag
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(10, 10)
+                Margin = new Padding(0, 0, 10, 0)
             };
             buttonAddApi.FlatAppearance.BorderSize = 0;
 
@@ -232,7 +238,7 @@ namespace POMsag
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(140, 10)
+                Margin = new Padding(0, 0, 10, 0)
             };
             buttonEditApi.FlatAppearance.BorderSize = 0;
 
@@ -243,8 +249,7 @@ namespace POMsag
                 Height = 40,
                 BackColor = Color.FromArgb(229, 62, 62),
                 ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(270, 10)
+                FlatStyle = FlatStyle.Flat
             };
             buttonDeleteApi.FlatAppearance.BorderSize = 0;
 
@@ -256,34 +261,45 @@ namespace POMsag
             apiButtonsPanel.Controls.Add(buttonEditApi);
             apiButtonsPanel.Controls.Add(buttonDeleteApi);
 
+            // Ajouter les éléments au TableLayout
+            apiTableLayout.Controls.Add(apiLabel, 0, 0);
+            apiTableLayout.Controls.Add(comboApis, 0, 1);
+            apiTableLayout.Controls.Add(apiInfoPanel, 0, 2);
+            apiTableLayout.Controls.Add(apiButtonsPanel, 0, 3);
+
             // ---- SECTION DES ENDPOINTS (Panel droit) ---- //
 
-            // Panel pour les endpoints
-            var endpointPanel = new Panel
+            // Créer un TableLayoutPanel pour organiser le contenu du panneau droit
+            var endpointTableLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
+                ColumnCount = 1,
+                RowCount = 3,
                 Padding = new Padding(10),
                 BackColor = ColorPalette.WhiteBackground,
                 BorderStyle = BorderStyle.FixedSingle
             };
 
+            // Définir la hauteur des lignes
+            endpointTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30)); // Label
+            endpointTableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // Buttons
+            endpointTableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // ListView
+
             var endpointLabel = new Label
             {
                 Text = "Endpoints disponibles :",
-                Dock = DockStyle.Top,
-                Height = 30,
+                Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 ForeColor = ColorPalette.PrimaryText
             };
 
-            // Boutons pour les endpoints - Modification pour rendre les boutons visibles
-            var endpointButtonsPanel = new Panel
+            // Boutons pour les endpoints
+            var endpointButtonsPanel = new FlowLayoutPanel
             {
-                Dock = DockStyle.Top, // Changé de Bottom à Top
-                Height = 60,
-                Padding = new Padding(10),
-                BackColor = ColorPalette.SecondaryBackground,
-                Margin = new Padding(0, 0, 0, 10)
+                Dock = DockStyle.Fill,
+                FlowDirection = FlowDirection.LeftToRight,
+                Padding = new Padding(0),
+                BackColor = ColorPalette.SecondaryBackground
             };
 
             buttonAddEndpoint = new Button
@@ -294,7 +310,7 @@ namespace POMsag
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(10, 10)
+                Margin = new Padding(0, 0, 10, 0)
             };
             buttonAddEndpoint.FlatAppearance.BorderSize = 0;
 
@@ -306,7 +322,7 @@ namespace POMsag
                 BackColor = ColorPalette.AccentColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Location = new Point(140, 10)
+                Margin = new Padding(0, 0, 10, 0)
             };
             buttonEditEndpoint.FlatAppearance.BorderSize = 0;
 
@@ -317,8 +333,7 @@ namespace POMsag
                 Height = 40,
                 BackColor = Color.FromArgb(229, 62, 62),
                 ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(270, 10)
+                FlatStyle = FlatStyle.Flat
             };
             buttonDeleteEndpoint.FlatAppearance.BorderSize = 0;
 
@@ -345,11 +360,16 @@ namespace POMsag
             listEndpoints.Columns.Add("Méthode", 70);
             listEndpoints.Columns.Add("Filtre par date", 120);
 
-            // Bouton fermer en bas - Réduit la hauteur pour plus d'espace
+            // Ajouter les éléments au TableLayout des endpoints
+            endpointTableLayout.Controls.Add(endpointLabel, 0, 0);
+            endpointTableLayout.Controls.Add(endpointButtonsPanel, 0, 1);
+            endpointTableLayout.Controls.Add(listEndpoints, 0, 2);
+
+            // Bouton fermer en bas
             var bottomPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 40, // Réduit la hauteur de 60 à 40
+                Height = 40,
                 Padding = new Padding(0, 5, 0, 0),
                 BackColor = ColorPalette.PrimaryBackground
             };
@@ -381,18 +401,9 @@ namespace POMsag
             bottomPanel.Controls.Add(closeButton);
             bottomPanel.Controls.Add(infoLabel);
 
-            // Assembler les panneaux - Changement de l'ordre pour rendre les boutons visibles
-            apiPanel.Controls.Add(apiButtonsPanel); // Ajout du panel des boutons API en premier
-            apiPanel.Controls.Add(apiInfoPanel);
-            apiPanel.Controls.Add(comboApis);
-            apiPanel.Controls.Add(apiLabel);
-
-            endpointPanel.Controls.Add(endpointButtonsPanel); // Ajout du panel des boutons Endpoint en premier
-            endpointPanel.Controls.Add(listEndpoints);
-            endpointPanel.Controls.Add(endpointLabel);
-
-            splitContainer.Panel1.Controls.Add(apiPanel);
-            splitContainer.Panel2.Controls.Add(endpointPanel);
+            // Assigner les panneaux aux panels du SplitContainer
+            splitContainer.Panel1.Controls.Add(apiTableLayout);
+            splitContainer.Panel2.Controls.Add(endpointTableLayout);
 
             this.Controls.Add(bottomPanel);
             this.Controls.Add(splitContainer);
