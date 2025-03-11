@@ -1,0 +1,647 @@
+2025-02-25 16:02:34 - Début du transfert pour: ReleasedProductsV2
+2025-02-25 16:02:34 - Transfert en cours pour ReleasedProductsV2...
+2025-02-25 16:02:34 - Récupération des produits depuis Dynamics 365...
+2025-02-25 16:02:34 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500
+2025-02-25 16:02:34 - Demande d'un nouveau token OAuth
+2025-02-25 16:02:34 - ERREUR [Obtention du token OAuth]
+Message: An invalid request URI was provided. Either the request URI must be an absolute URI or BaseAddress must be set.
+StackTrace:    at System.Net.Http.HttpClient.PrepareRequestMessage(HttpRequestMessage request)
+   at System.Net.Http.HttpClient.SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 57
+--------------------------------------------------------------------------------
+2025-02-25 16:02:34 - ERREUR [GetDataAsync pour ReleasedProductsV2?cross-company=true&$top=500]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 77
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 97
+InnerException: An invalid request URI was provided. Either the request URI must be an absolute URI or BaseAddress must be set.
+InnerStackTrace:    at System.Net.Http.HttpClient.PrepareRequestMessage(HttpRequestMessage request)
+   at System.Net.Http.HttpClient.SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 57
+--------------------------------------------------------------------------------
+2025-02-25 16:02:34 - ERREUR [GetReleasedProductsAsync]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 77
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 97
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany, Int32 top) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 175
+InnerException: An invalid request URI was provided. Either the request URI must be an absolute URI or BaseAddress must be set.
+InnerStackTrace:    at System.Net.Http.HttpClient.PrepareRequestMessage(HttpRequestMessage request)
+   at System.Net.Http.HttpClient.SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 57
+--------------------------------------------------------------------------------
+2025-02-25 16:02:34 - ERREUR [Transfert ReleasedProductsV2]
+Message: Erreur lors de la récupération des produits depuis Dynamics 365
+StackTrace:    at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany, Int32 top) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 198
+   at POMsag.Form1.ButtonTransfer_Click(Object sender, EventArgs e) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Form1.cs:line 132
+InnerException: Erreur lors de l'obtention du token d'authentification
+InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 77
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 97
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany, Int32 top) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 175
+--------------------------------------------------------------------------------
+2025-02-25 16:02:34 - ERREUR: Erreur lors de la récupération des produits depuis Dynamics 365
+2025-02-26 14:47:56 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 14:47:56 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 14:47:56 - Récupération des produits depuis Dynamics 365...
+2025-02-26 14:47:56 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500
+2025-02-26 14:47:56 - Demande d'un nouveau token OAuth
+2025-02-26 14:47:57 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 14:47:57 - ERREUR [Obtention du token OAuth]
+Message: The requested operation requires an element of type 'Number', but the target element has type 'String'.
+StackTrace:    at System.Text.Json.ThrowHelper.ThrowJsonElementWrongTypeException(JsonTokenType expectedType, JsonTokenType actualType)
+   at System.Text.Json.JsonDocument.TryGetValue(Int32 index, Int32& value)
+   at System.Text.Json.JsonElement.GetInt32()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 70
+--------------------------------------------------------------------------------
+2025-02-26 14:47:57 - ERREUR [GetDataAsync pour ReleasedProductsV2?cross-company=true&$top=500]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 79
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 99
+InnerException: The requested operation requires an element of type 'Number', but the target element has type 'String'.
+InnerStackTrace:    at System.Text.Json.ThrowHelper.ThrowJsonElementWrongTypeException(JsonTokenType expectedType, JsonTokenType actualType)
+   at System.Text.Json.JsonDocument.TryGetValue(Int32 index, Int32& value)
+   at System.Text.Json.JsonElement.GetInt32()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 70
+--------------------------------------------------------------------------------
+2025-02-26 14:47:57 - ERREUR [GetReleasedProductsAsync]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 79
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 99
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 179
+InnerException: The requested operation requires an element of type 'Number', but the target element has type 'String'.
+InnerStackTrace:    at System.Text.Json.ThrowHelper.ThrowJsonElementWrongTypeException(JsonTokenType expectedType, JsonTokenType actualType)
+   at System.Text.Json.JsonDocument.TryGetValue(Int32 index, Int32& value)
+   at System.Text.Json.JsonElement.GetInt32()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 70
+--------------------------------------------------------------------------------
+2025-02-26 14:47:57 - ERREUR [Transfert ReleasedProductsV2]
+Message: Erreur lors de la récupération des produits depuis Dynamics 365
+StackTrace:    at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 202
+   at POMsag.Form1.ButtonTransfer_Click(Object sender, EventArgs e) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Form1.cs:line 132
+InnerException: Erreur lors de l'obtention du token d'authentification
+InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 79
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 99
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 179
+--------------------------------------------------------------------------------
+2025-02-26 14:47:57 - ERREUR: Erreur lors de la récupération des produits depuis Dynamics 365
+2025-02-26 14:54:07 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 14:54:07 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 14:54:07 - Récupération des produits depuis Dynamics 365...
+2025-02-26 14:54:07 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=10
+2025-02-26 14:54:07 - Demande d'un nouveau token OAuth
+2025-02-26 14:54:08 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 14:54:08 - Token OAuth obtenu, valide jusqu'à 26/02/2025 15:53:07
+2025-02-26 14:54:08 - Envoi de la requête GET
+2025-02-26 14:54:09 - Réponse reçue, statut: OK
+2025-02-26 14:54:09 - Récupération terminée. 10 produits trouvés.
+2025-02-26 14:54:09 - Enregistrement des données dans la base de destination...
+2025-02-26 14:54:10 - Enregistrement terminé avec succès.
+2025-02-26 14:54:13 - Transfert terminé avec succès pour ReleasedProductsV2. 10 enregistrements.
+2025-02-26 15:26:08 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 15:26:08 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 15:26:08 - Récupération des produits depuis Dynamics 365...
+2025-02-26 15:26:08 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=10&$filter=PurchasePriceDate ge 2025-02-24T00:00:00Z
+2025-02-26 15:26:08 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=10&$filter=PurchasePriceDate ge 2025-02-24T00:00:00Z
+2025-02-26 15:26:08 - Demande d'un nouveau token OAuth
+2025-02-26 15:26:09 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 15:26:09 - Token OAuth obtenu, valide jusqu'à 26/02/2025 16:25:08
+2025-02-26 15:26:09 - Envoi de la requête GET
+2025-02-26 15:26:15 - Réponse reçue, statut: OK
+2025-02-26 15:26:15 - Récupération terminée. 1 produits trouvés.
+2025-02-26 15:26:15 - Enregistrement des données dans la base de destination...
+2025-02-26 15:26:16 - Enregistrement terminé avec succès.
+2025-02-26 15:26:23 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-26 15:33:19 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 15:33:19 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 15:33:19 - Récupération des produits depuis Dynamics 365...
+2025-02-26 15:33:19 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=10&$filter=ModifiedDateTime ge 2025-02-17T00:00:00Z and ModifiedDateTime le 2025-02-28T23:59:59Z
+2025-02-26 15:33:19 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=10&$filter=ModifiedDateTime ge 2025-02-17T00:00:00Z and ModifiedDateTime le 2025-02-28T23:59:59Z
+2025-02-26 15:33:19 - Envoi de la requête GET
+2025-02-26 15:33:19 - Réponse reçue, statut: BadRequest
+2025-02-26 15:33:19 - Erreur API: BadRequest - {
+  "error":{
+    "code":"","message":"An error has occurred.","innererror":{
+      "message":"Could not find a property named 'ModifiedDateTime' on type 'Microsoft.Dynamics.DataEntities.ReleasedProductV2'.","type":"Microsoft.OData.Core.ODataException","stacktrace":"   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.GeneratePropertyAccessQueryForOpenType(EndPathToken endPathToken, SingleValueNode parentNode)\r\n   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(String filter, ODataUriParserConfiguration configuration, IEdmType elementType, IEdmNavigationSource navigationSource)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter()\r\n   at System.Web.OData.Query.FilterQueryOption.get_FilterClause()\r\n   at System.Web.OData.Query.FilterQueryOption.ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.Query.QueryableExtensions.ApplyQueryOptions(IQueryable queryable, HttpRequestMessage request, ODataQueryOptions queryOptions, Boolean isCollection)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.AxODataController.Get()\r\n   at lambda_method(Closure , Object , Object[] )\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ActionExecutor.<>c__DisplayClass6_2.<GetExecutor>b__2(Object instance, Object[] methodParameters)\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ExecuteAsync(HttpControllerContext controllerContext, IDictionary`2 arguments, CancellationToken cancellationToken)\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ApiControllerActionInvoker.<InvokeActionAsyncCore>d__1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ActionFilterResult.<ExecuteAsync>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.Tracers.HttpControllerTracer.<ExecuteAsyncCore>d__10.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Dispatcher.HttpControllerDispatcher.<SendAsync>d__15.MoveNext()"
+    }
+  }
+}
+2025-02-26 15:33:19 - ERREUR [GetDataAsync pour ReleasedProductsV2?cross-company=true&$top=10&$filter=ModifiedDateTime ge 2025-02-17T00:00:00Z and ModifiedDateTime le 2025-02-28T23:59:59Z]
+Message: Erreur de l'API Dynamics: BadRequest - {
+  "error":{
+    "code":"","message":"An error has occurred.","innererror":{
+      "message":"Could not find a property named 'ModifiedDateTime' on type 'Microsoft.Dynamics.DataEntities.ReleasedProductV2'.","type":"Microsoft.OData.Core.ODataException","stacktrace":"   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.GeneratePropertyAccessQueryForOpenType(EndPathToken endPathToken, SingleValueNode parentNode)\r\n   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(String filter, ODataUriParserConfiguration configuration, IEdmType elementType, IEdmNavigationSource navigationSource)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter()\r\n   at System.Web.OData.Query.FilterQueryOption.get_FilterClause()\r\n   at System.Web.OData.Query.FilterQueryOption.ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.Query.QueryableExtensions.ApplyQueryOptions(IQueryable queryable, HttpRequestMessage request, ODataQueryOptions queryOptions, Boolean isCollection)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.AxODataController.Get()\r\n   at lambda_method(Closure , Object , Object[] )\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ActionExecutor.<>c__DisplayClass6_2.<GetExecutor>b__2(Object instance, Object[] methodParameters)\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ExecuteAsync(HttpControllerContext controllerContext, IDictionary`2 arguments, CancellationToken cancellationToken)\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ApiControllerActionInvoker.<InvokeActionAsyncCore>d__1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ActionFilterResult.<ExecuteAsync>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.Tracers.HttpControllerTracer.<ExecuteAsyncCore>d__10.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Dispatcher.HttpControllerDispatcher.<SendAsync>d__15.MoveNext()"
+    }
+  }
+}
+StackTrace:    at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 147
+--------------------------------------------------------------------------------
+2025-02-26 15:33:20 - ERREUR [GetReleasedProductsAsync]
+Message: Erreur de l'API Dynamics: BadRequest - {
+  "error":{
+    "code":"","message":"An error has occurred.","innererror":{
+      "message":"Could not find a property named 'ModifiedDateTime' on type 'Microsoft.Dynamics.DataEntities.ReleasedProductV2'.","type":"Microsoft.OData.Core.ODataException","stacktrace":"   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.GeneratePropertyAccessQueryForOpenType(EndPathToken endPathToken, SingleValueNode parentNode)\r\n   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(String filter, ODataUriParserConfiguration configuration, IEdmType elementType, IEdmNavigationSource navigationSource)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter()\r\n   at System.Web.OData.Query.FilterQueryOption.get_FilterClause()\r\n   at System.Web.OData.Query.FilterQueryOption.ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.Query.QueryableExtensions.ApplyQueryOptions(IQueryable queryable, HttpRequestMessage request, ODataQueryOptions queryOptions, Boolean isCollection)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.AxODataController.Get()\r\n   at lambda_method(Closure , Object , Object[] )\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ActionExecutor.<>c__DisplayClass6_2.<GetExecutor>b__2(Object instance, Object[] methodParameters)\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ExecuteAsync(HttpControllerContext controllerContext, IDictionary`2 arguments, CancellationToken cancellationToken)\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ApiControllerActionInvoker.<InvokeActionAsyncCore>d__1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ActionFilterResult.<ExecuteAsync>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.Tracers.HttpControllerTracer.<ExecuteAsyncCore>d__10.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Dispatcher.HttpControllerDispatcher.<SendAsync>d__15.MoveNext()"
+    }
+  }
+}
+StackTrace:    at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 147
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, Boolean filterByPurchaseDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 223
+--------------------------------------------------------------------------------
+2025-02-26 15:33:20 - ERREUR [Transfert ReleasedProductsV2]
+Message: Erreur lors de la récupération des produits depuis Dynamics 365
+StackTrace:    at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, Boolean filterByPurchaseDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 246
+   at POMsag.Form1.ButtonTransfer_Click(Object sender, EventArgs e) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Form1.cs:line 137
+InnerException: Erreur de l'API Dynamics: BadRequest - {
+  "error":{
+    "code":"","message":"An error has occurred.","innererror":{
+      "message":"Could not find a property named 'ModifiedDateTime' on type 'Microsoft.Dynamics.DataEntities.ReleasedProductV2'.","type":"Microsoft.OData.Core.ODataException","stacktrace":"   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.GeneratePropertyAccessQueryForOpenType(EndPathToken endPathToken, SingleValueNode parentNode)\r\n   at Microsoft.OData.Core.UriParser.Parsers.EndPathBinder.BindEndPath(EndPathToken endPathToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.GetOperandFromToken(BinaryOperatorKind operatorKind, QueryToken queryToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.BinaryOperatorBinder.BindBinaryOperator(BinaryOperatorToken binaryOperatorToken)\r\n   at Microsoft.OData.Core.UriParser.Parsers.MetadataBinder.Bind(QueryToken token)\r\n   at Microsoft.OData.Core.UriParser.Parsers.FilterBinder.BindFilter(QueryToken filter)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilterImplementation(String filter, ODataUriParserConfiguration configuration, IEdmType elementType, IEdmNavigationSource navigationSource)\r\n   at Microsoft.OData.Core.UriParser.ODataQueryOptionParser.ParseFilter()\r\n   at System.Web.OData.Query.FilterQueryOption.get_FilterClause()\r\n   at System.Web.OData.Query.FilterQueryOption.ApplyTo(IQueryable query, ODataQuerySettings querySettings, IAssembliesResolver assembliesResolver)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.Query.QueryableExtensions.ApplyQueryOptions(IQueryable queryable, HttpRequestMessage request, ODataQueryOptions queryOptions, Boolean isCollection)\r\n   at Microsoft.Dynamics.Platform.Integration.Services.OData.AxODataController.Get()\r\n   at lambda_method(Closure , Object , Object[] )\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ActionExecutor.<>c__DisplayClass6_2.<GetExecutor>b__2(Object instance, Object[] methodParameters)\r\n   at System.Web.Http.Controllers.ReflectedHttpActionDescriptor.ExecuteAsync(HttpControllerContext controllerContext, IDictionary`2 arguments, CancellationToken cancellationToken)\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ApiControllerActionInvoker.<InvokeActionAsyncCore>d__1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<CallOnActionExecutedAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Filters.ActionFilterAttribute.<ExecuteActionFilterAsyncCore>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ActionFilterResult.<ExecuteAsync>d__5.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Web.Http.Controllers.ExceptionFilterResult.<ExecuteAsync>d__6.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.Tracers.HttpControllerTracer.<ExecuteAsyncCore>d__10.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Tracing.ITraceWriterExtensions.<TraceBeginEndAsyncCore>d__17`1.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at System.Web.Http.Dispatcher.HttpControllerDispatcher.<SendAsync>d__15.MoveNext()"
+    }
+  }
+}
+InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 147
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startDate, Nullable`1 endDate, Boolean filterByPurchaseDate, String crossCompany) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 223
+--------------------------------------------------------------------------------
+2025-02-26 15:33:20 - ERREUR: Erreur lors de la récupération des produits depuis Dynamics 365
+2025-02-26 15:46:16 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 15:46:16 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 15:46:16 - Récupération des produits depuis Dynamics 365...
+2025-02-26 15:46:16 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=10&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-10T23:59:59Z
+2025-02-26 15:46:16 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=10&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-10T23:59:59Z
+2025-02-26 15:46:16 - Demande d'un nouveau token OAuth
+2025-02-26 15:46:16 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 15:46:16 - Token OAuth obtenu, valide jusqu'à 26/02/2025 16:45:15
+2025-02-26 15:46:16 - Envoi de la requête GET
+2025-02-26 15:46:18 - Réponse reçue, statut: OK
+2025-02-26 15:46:18 - Récupération terminée. 10 produits trouvés.
+2025-02-26 15:46:18 - Enregistrement des données dans la base de destination...
+2025-02-26 15:46:18 - Enregistrement terminé avec succès.
+2025-02-26 15:46:23 - Transfert terminé avec succès pour ReleasedProductsV2. 10 enregistrements.
+2025-02-26 15:52:52 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 15:52:52 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 15:52:52 - Récupération des produits depuis Dynamics 365...
+2025-02-26 15:52:52 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-10T23:59:59Z
+2025-02-26 15:52:52 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-10T23:59:59Z
+2025-02-26 15:52:52 - Demande d'un nouveau token OAuth
+2025-02-26 15:52:52 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 15:52:52 - Token OAuth obtenu, valide jusqu'à 26/02/2025 16:51:51
+2025-02-26 15:52:52 - Envoi de la requête GET
+2025-02-26 15:53:59 - Réponse reçue, statut: OK
+2025-02-26 15:53:59 - Récupération terminée. 500 produits trouvés.
+2025-02-26 15:53:59 - Enregistrement des données dans la base de destination...
+2025-02-26 15:53:59 - Enregistrement terminé avec succès.
+2025-02-26 15:54:16 - Transfert terminé avec succès pour ReleasedProductsV2. 500 enregistrements.
+2025-02-26 16:03:30 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 16:03:30 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 16:03:30 - Récupération des produits depuis Dynamics 365...
+2025-02-26 16:03:30 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-25T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:30 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-25T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:30 - Demande d'un nouveau token OAuth
+2025-02-26 16:03:31 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-26 16:03:31 - Token OAuth obtenu, valide jusqu'à 26/02/2025 17:02:30
+2025-02-26 16:03:31 - Envoi de la requête GET
+2025-02-26 16:03:31 - Réponse reçue, statut: OK
+2025-02-26 16:03:31 - Récupération terminée. 1 produits trouvés.
+2025-02-26 16:03:31 - Enregistrement des données dans la base de destination...
+2025-02-26 16:03:31 - Enregistrement terminé avec succès.
+2025-02-26 16:03:34 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-26 16:03:37 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 16:03:37 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 16:03:37 - Récupération des produits depuis Dynamics 365...
+2025-02-26 16:03:37 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-24T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:37 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-24T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:37 - Envoi de la requête GET
+2025-02-26 16:03:37 - Réponse reçue, statut: OK
+2025-02-26 16:03:37 - Récupération terminée. 1 produits trouvés.
+2025-02-26 16:03:37 - Enregistrement des données dans la base de destination...
+2025-02-26 16:03:37 - Enregistrement terminé avec succès.
+2025-02-26 16:03:38 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-26 16:03:41 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 16:03:41 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 16:03:41 - Récupération des produits depuis Dynamics 365...
+2025-02-26 16:03:41 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-23T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:41 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-23T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:41 - Envoi de la requête GET
+2025-02-26 16:03:41 - Réponse reçue, statut: OK
+2025-02-26 16:03:41 - Récupération terminée. 1 produits trouvés.
+2025-02-26 16:03:41 - Enregistrement des données dans la base de destination...
+2025-02-26 16:03:41 - Enregistrement terminé avec succès.
+2025-02-26 16:03:42 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-26 16:03:44 - Début du transfert pour: ReleasedProductsV2
+2025-02-26 16:03:44 - Transfert en cours pour ReleasedProductsV2...
+2025-02-26 16:03:44 - Récupération des produits depuis Dynamics 365...
+2025-02-26 16:03:44 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-21T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:44 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=500&$filter=PurchasePriceDate ge 2025-02-21T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z
+2025-02-26 16:03:44 - Envoi de la requête GET
+2025-02-26 16:03:44 - Réponse reçue, statut: OK
+2025-02-26 16:03:44 - Récupération terminée. 3 produits trouvés.
+2025-02-26 16:03:44 - Enregistrement des données dans la base de destination...
+2025-02-26 16:03:45 - Enregistrement terminé avec succès.
+2025-02-26 16:03:46 - Transfert terminé avec succès pour ReleasedProductsV2. 3 enregistrements.
+2025-02-27 08:43:40 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 08:43:40 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 08:43:40 - Récupération des produits depuis Dynamics 365...
+2025-02-27 08:43:40 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=10
+2025-02-27 08:43:40 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=10
+2025-02-27 08:43:40 - Demande d'un nouveau token OAuth
+2025-02-27 08:43:41 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 08:43:41 - Token OAuth obtenu, valide jusqu'à 27/02/2025 09:42:40
+2025-02-27 08:43:41 - Envoi de la requête GET
+2025-02-27 08:43:41 - Réponse reçue, statut: OK
+2025-02-27 08:43:41 - Récupération terminée. 10 produits trouvés.
+2025-02-27 08:43:41 - Enregistrement des données dans la base de destination...
+2025-02-27 08:43:41 - Enregistrement inséré avec JSON_KEYU: 11
+2025-02-27 08:43:41 - Enregistrement terminé avec succès.
+2025-02-27 08:43:45 - Transfert terminé avec succès pour ReleasedProductsV2. 10 enregistrements.
+2025-02-27 09:40:19 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 09:40:19 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 09:40:19 - Récupération des produits depuis Dynamics 365...
+2025-02-27 09:40:19 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-25T00:00:00Z and PurchasePriceDate le 2025-03-28T23:59:59Z&$top=2
+2025-02-27 09:40:19 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-25T00:00:00Z and PurchasePriceDate le 2025-03-28T23:59:59Z&$top=2
+2025-02-27 09:40:19 - Demande d'un nouveau token OAuth
+2025-02-27 09:40:19 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 09:40:19 - Token OAuth obtenu, valide jusqu'à 27/02/2025 10:39:18
+2025-02-27 09:40:19 - Envoi de la requête GET
+2025-02-27 09:40:20 - Réponse reçue, statut: OK
+2025-02-27 09:40:20 - Récupération terminée. 2 produits trouvés.
+2025-02-27 09:40:20 - Enregistrement des données dans la base de destination...
+2025-02-27 09:40:21 - Article inséré avec JSON_KEYU: 12
+2025-02-27 09:40:21 - Article inséré avec JSON_KEYU: 13
+2025-02-27 09:40:21 - Enregistrement terminé avec succès.
+2025-02-27 09:40:28 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 09:44:39 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 09:44:39 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 09:44:39 - Récupération des produits depuis Dynamics 365...
+2025-02-27 09:44:39 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-03-20T00:00:00Z and PurchasePriceDate le 2025-03-29T23:59:59Z&$top=2
+2025-02-27 09:44:39 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-03-20T00:00:00Z and PurchasePriceDate le 2025-03-29T23:59:59Z&$top=2
+2025-02-27 09:44:39 - Envoi de la requête GET
+2025-02-27 09:44:39 - Réponse reçue, statut: OK
+2025-02-27 09:44:39 - Récupération terminée. 0 produits trouvés.
+2025-02-27 09:44:39 - Enregistrement des données dans la base de destination...
+2025-02-27 09:44:39 - Enregistrement terminé avec succès.
+2025-02-27 09:44:41 - Transfert terminé avec succès pour ReleasedProductsV2. 0 enregistrements.
+2025-02-27 10:34:49 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 10:34:49 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 10:34:49 - Récupération des produits depuis Dynamics 365...
+2025-02-27 10:34:49 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:34:49 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:34:49 - Demande d'un nouveau token OAuth
+2025-02-27 10:34:50 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 10:34:50 - Token OAuth obtenu, valide jusqu'à 27/02/2025 11:33:49
+2025-02-27 10:34:50 - Envoi de la requête GET
+2025-02-27 10:34:55 - Réponse reçue, statut: OK
+2025-02-27 10:34:55 - Récupération terminée. 1 produits trouvés.
+2025-02-27 10:34:55 - Enregistrement des données dans la base de destination...
+2025-02-27 10:34:55 - Article inséré avec JSON_KEYU: 14
+2025-02-27 10:34:55 - Enregistrement terminé avec succès.
+2025-02-27 10:34:56 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-27 10:58:55 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 10:58:55 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 10:58:55 - Récupération des produits depuis Dynamics 365...
+2025-02-27 10:58:55 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:58:55 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:58:55 - Demande d'un nouveau token OAuth
+2025-02-27 10:58:55 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 10:58:55 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 10:58:55 - Récupération des produits depuis Dynamics 365...
+2025-02-27 10:58:55 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:58:55 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-02-27 10:58:55 - Demande d'un nouveau token OAuth
+2025-02-27 10:58:55 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 10:58:56 - Token OAuth obtenu, valide jusqu'à 27/02/2025 11:57:55
+2025-02-27 10:58:56 - Envoi de la requête GET
+2025-02-27 10:58:56 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 10:58:56 - Token OAuth obtenu, valide jusqu'à 27/02/2025 11:57:55
+2025-02-27 10:58:56 - Envoi de la requête GET
+2025-02-27 10:58:56 - Réponse reçue, statut: OK
+2025-02-27 10:58:56 - Récupération terminée. 1 produits trouvés.
+2025-02-27 10:58:56 - Enregistrement des données dans la base de destination...
+2025-02-27 10:58:56 - Réponse reçue, statut: OK
+2025-02-27 10:58:56 - Récupération terminée. 1 produits trouvés.
+2025-02-27 10:58:56 - Enregistrement des données dans la base de destination...
+2025-02-27 10:58:56 - Article inséré avec JSON_KEYU: 15
+2025-02-27 10:58:56 - Enregistrement terminé avec succès.
+2025-02-27 10:58:56 - Article inséré avec JSON_KEYU: 16
+2025-02-27 10:58:56 - Enregistrement terminé avec succès.
+2025-02-27 10:58:58 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-27 10:58:59 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-02-27 11:13:40 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:13:40 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:13:40 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:13:40 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=13
+2025-02-27 11:13:40 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=13
+2025-02-27 11:13:40 - Demande d'un nouveau token OAuth
+2025-02-27 11:13:40 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:13:40 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:13:40 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:13:40 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=13
+2025-02-27 11:13:40 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=13
+2025-02-27 11:13:40 - Demande d'un nouveau token OAuth
+2025-02-27 11:13:41 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:13:41 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:12:40
+2025-02-27 11:13:41 - Envoi de la requête GET
+2025-02-27 11:13:41 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:13:41 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:12:40
+2025-02-27 11:13:41 - Envoi de la requête GET
+2025-02-27 11:13:41 - Réponse reçue, statut: OK
+2025-02-27 11:13:41 - Récupération terminée. 13 produits trouvés.
+2025-02-27 11:13:41 - Enregistrement des données dans la base de destination...
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 17
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 18
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 19
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 20
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 21
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 22
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 23
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 24
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 25
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 26
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 27
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 28
+2025-02-27 11:13:41 - Article inséré avec JSON_KEYU: 29
+2025-02-27 11:13:41 - Enregistrement terminé avec succès.
+2025-02-27 11:13:43 - Transfert terminé avec succès pour ReleasedProductsV2. 13 enregistrements.
+2025-02-27 11:13:45 - Réponse reçue, statut: OK
+2025-02-27 11:13:45 - Récupération terminée. 13 produits trouvés.
+2025-02-27 11:13:45 - Enregistrement des données dans la base de destination...
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 30
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 31
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 32
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 33
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 34
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 35
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 36
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 37
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 38
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 39
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 40
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 41
+2025-02-27 11:13:45 - Article inséré avec JSON_KEYU: 42
+2025-02-27 11:13:45 - Enregistrement terminé avec succès.
+2025-02-27 11:13:47 - Transfert terminé avec succès pour ReleasedProductsV2. 13 enregistrements.
+2025-02-27 11:19:11 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:19:11 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:19:11 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:19:11 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=8
+2025-02-27 11:19:11 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=8
+2025-02-27 11:19:11 - Demande d'un nouveau token OAuth
+2025-02-27 11:19:11 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:19:11 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:19:11 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:19:11 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=8
+2025-02-27 11:19:11 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=8
+2025-02-27 11:19:11 - Demande d'un nouveau token OAuth
+2025-02-27 11:19:11 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:19:11 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:18:10
+2025-02-27 11:19:11 - Envoi de la requête GET
+2025-02-27 11:19:11 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:19:11 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:18:10
+2025-02-27 11:19:11 - Envoi de la requête GET
+2025-02-27 11:19:11 - Réponse reçue, statut: OK
+2025-02-27 11:19:11 - Récupération terminée. 8 produits trouvés.
+2025-02-27 11:19:11 - Enregistrement des données dans la base de destination...
+2025-02-27 11:19:11 - Réponse reçue, statut: OK
+2025-02-27 11:19:11 - Récupération terminée. 8 produits trouvés.
+2025-02-27 11:19:11 - Enregistrement des données dans la base de destination...
+2025-02-27 11:19:11 - Article inséré avec JSON_KEYU: 43
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 44
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 45
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 46
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 47
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 48
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 49
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 50
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 51
+2025-02-27 11:19:12 - Enregistrement terminé avec succès.
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 52
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 53
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 54
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 55
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 56
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 57
+2025-02-27 11:19:12 - Article inséré avec JSON_KEYU: 58
+2025-02-27 11:19:12 - Enregistrement terminé avec succès.
+2025-02-27 11:19:13 - Transfert terminé avec succès pour ReleasedProductsV2. 8 enregistrements.
+2025-02-27 11:19:14 - Transfert terminé avec succès pour ReleasedProductsV2. 8 enregistrements.
+2025-02-27 11:21:18 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:21:18 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:21:18 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:21:18 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:21:18 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:21:18 - Demande d'un nouveau token OAuth
+2025-02-27 11:21:18 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:21:18 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:21:18 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:21:18 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:21:18 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:21:18 - Demande d'un nouveau token OAuth
+2025-02-27 11:21:19 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:21:19 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:20:18
+2025-02-27 11:21:19 - Envoi de la requête GET
+2025-02-27 11:21:19 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:21:19 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:20:18
+2025-02-27 11:21:19 - Envoi de la requête GET
+2025-02-27 11:21:19 - Réponse reçue, statut: OK
+2025-02-27 11:21:19 - Récupération terminée. 2 produits trouvés.
+2025-02-27 11:21:19 - Enregistrement des données dans la base de destination...
+2025-02-27 11:21:19 - Réponse reçue, statut: OK
+2025-02-27 11:21:19 - Récupération terminée. 2 produits trouvés.
+2025-02-27 11:21:19 - Enregistrement des données dans la base de destination...
+2025-02-27 11:21:20 - Données insérées avec JSON_KEYU: 60, 2 éléments
+2025-02-27 11:21:20 - Enregistrement terminé avec succès.
+2025-02-27 11:21:20 - Données insérées avec JSON_KEYU: 59, 2 éléments
+2025-02-27 11:21:20 - Enregistrement terminé avec succès.
+2025-02-27 11:21:21 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 11:21:22 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 11:23:08 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:23:08 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:23:08 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:23:08 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:23:08 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:23:08 - Demande d'un nouveau token OAuth
+2025-02-27 11:23:08 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 11:23:08 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 11:23:08 - Récupération des produits depuis Dynamics 365...
+2025-02-27 11:23:08 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:23:08 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-27 11:23:08 - Demande d'un nouveau token OAuth
+2025-02-27 11:23:08 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:23:08 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:22:07
+2025-02-27 11:23:08 - Envoi de la requête GET
+2025-02-27 11:23:08 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 11:23:08 - Token OAuth obtenu, valide jusqu'à 27/02/2025 12:22:07
+2025-02-27 11:23:08 - Envoi de la requête GET
+2025-02-27 11:23:09 - Réponse reçue, statut: OK
+2025-02-27 11:23:09 - Récupération terminée. 2 produits trouvés.
+2025-02-27 11:23:09 - Enregistrement des données dans la base de destination...
+2025-02-27 11:23:09 - Réponse reçue, statut: OK
+2025-02-27 11:23:09 - Récupération terminée. 2 produits trouvés.
+2025-02-27 11:23:09 - Enregistrement des données dans la base de destination...
+2025-02-27 11:23:09 - Données insérées avec JSON_KEYU: 62, 2 éléments
+2025-02-27 11:23:09 - Enregistrement terminé avec succès.
+2025-02-27 11:23:09 - Données insérées avec JSON_KEYU: 61, 2 éléments
+2025-02-27 11:23:09 - Enregistrement terminé avec succès.
+2025-02-27 11:23:10 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 11:23:12 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 12:40:01 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 12:40:01 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 12:40:01 - Récupération des produits depuis Dynamics 365...
+2025-02-27 12:40:01 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-01-27T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z&$top=2
+2025-02-27 12:40:02 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-01-27T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z&$top=2
+2025-02-27 12:40:02 - Demande d'un nouveau token OAuth
+2025-02-27 12:40:02 - Début du transfert pour: ReleasedProductsV2
+2025-02-27 12:40:02 - Transfert en cours pour ReleasedProductsV2...
+2025-02-27 12:40:02 - Récupération des produits depuis Dynamics 365...
+2025-02-27 12:40:02 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-01-27T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z&$top=2
+2025-02-27 12:40:02 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-01-27T00:00:00Z and PurchasePriceDate le 2025-02-27T23:59:59Z&$top=2
+2025-02-27 12:40:02 - Demande d'un nouveau token OAuth
+2025-02-27 12:40:02 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 12:40:02 - Token OAuth obtenu, valide jusqu'à 27/02/2025 13:39:01
+2025-02-27 12:40:02 - Envoi de la requête GET
+2025-02-27 12:40:02 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-27 12:40:02 - Token OAuth obtenu, valide jusqu'à 27/02/2025 13:39:01
+2025-02-27 12:40:02 - Envoi de la requête GET
+2025-02-27 12:40:03 - Réponse reçue, statut: OK
+2025-02-27 12:40:03 - Récupération terminée. 2 produits trouvés.
+2025-02-27 12:40:03 - Enregistrement des données dans la base de destination...
+2025-02-27 12:40:03 - Réponse reçue, statut: OK
+2025-02-27 12:40:03 - Récupération terminée. 2 produits trouvés.
+2025-02-27 12:40:03 - Enregistrement des données dans la base de destination...
+2025-02-27 12:40:04 - Données insérées avec JSON_KEYU: 64, 2 éléments
+2025-02-27 12:40:04 - Enregistrement terminé avec succès.
+2025-02-27 12:40:04 - Données insérées avec JSON_KEYU: 63, 2 éléments
+2025-02-27 12:40:04 - Enregistrement terminé avec succès.
+2025-02-27 12:40:05 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-27 12:40:15 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-28 08:59:10 - Début du transfert pour: ReleasedProductsV2
+2025-02-28 08:59:10 - Transfert en cours pour ReleasedProductsV2...
+2025-02-28 08:59:10 - Récupération des produits depuis Dynamics 365...
+2025-02-28 08:59:10 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-28 08:59:10 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-28 08:59:10 - Demande d'un nouveau token OAuth
+2025-02-28 08:59:10 - Début du transfert pour: ReleasedProductsV2
+2025-02-28 08:59:10 - Transfert en cours pour ReleasedProductsV2...
+2025-02-28 08:59:10 - Récupération des produits depuis Dynamics 365...
+2025-02-28 08:59:10 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=2
+2025-02-28 08:59:10 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=2
+2025-02-28 08:59:10 - Demande d'un nouveau token OAuth
+2025-02-28 08:59:11 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-28 08:59:11 - Token OAuth obtenu, valide jusqu'à 28/02/2025 09:58:10
+2025-02-28 08:59:11 - Envoi de la requête GET
+2025-02-28 08:59:11 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-28 08:59:11 - Token OAuth obtenu, valide jusqu'à 28/02/2025 09:58:10
+2025-02-28 08:59:11 - Envoi de la requête GET
+2025-02-28 08:59:16 - Réponse reçue, statut: OK
+2025-02-28 08:59:16 - Récupération terminée. 2 produits trouvés.
+2025-02-28 08:59:16 - Enregistrement des données dans la base de destination...
+2025-02-28 08:59:16 - Réponse reçue, statut: OK
+2025-02-28 08:59:16 - Récupération terminée. 2 produits trouvés.
+2025-02-28 08:59:16 - Enregistrement des données dans la base de destination...
+2025-02-28 08:59:17 - Données insérées avec JSON_KEYU: 66, 2 éléments
+2025-02-28 08:59:17 - Enregistrement terminé avec succès.
+2025-02-28 08:59:17 - Données insérées avec JSON_KEYU: 65, 2 éléments
+2025-02-28 08:59:17 - Enregistrement terminé avec succès.
+2025-02-28 08:59:19 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-28 08:59:19 - Transfert terminé avec succès pour ReleasedProductsV2. 2 enregistrements.
+2025-02-28 09:08:56 - Début du transfert pour: ReleasedProductsV2
+2025-02-28 09:08:56 - Transfert en cours pour ReleasedProductsV2...
+2025-02-28 09:08:56 - Récupération des produits depuis Dynamics 365...
+2025-02-28 09:08:56 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-28T23:59:59Z&$top=5
+2025-02-28 09:08:56 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-28T23:59:59Z&$top=5
+2025-02-28 09:08:56 - Demande d'un nouveau token OAuth
+2025-02-28 09:08:56 - Début du transfert pour: ReleasedProductsV2
+2025-02-28 09:08:56 - Transfert en cours pour ReleasedProductsV2...
+2025-02-28 09:08:56 - Récupération des produits depuis Dynamics 365...
+2025-02-28 09:08:56 - URL de requête OData: ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-28T23:59:59Z&$top=5
+2025-02-28 09:08:56 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$filter=PurchasePriceDate ge 2025-02-01T00:00:00Z and PurchasePriceDate le 2025-02-28T23:59:59Z&$top=5
+2025-02-28 09:08:56 - Demande d'un nouveau token OAuth
+2025-02-28 09:08:57 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-28 09:08:57 - Token OAuth obtenu, valide jusqu'à 28/02/2025 10:07:56
+2025-02-28 09:08:57 - Envoi de la requête GET
+2025-02-28 09:08:57 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-02-28 09:08:57 - Token OAuth obtenu, valide jusqu'à 28/02/2025 10:07:56
+2025-02-28 09:08:57 - Envoi de la requête GET
+2025-02-28 09:08:58 - Réponse reçue, statut: OK
+2025-02-28 09:08:58 - Récupération terminée. 5 produits trouvés.
+2025-02-28 09:08:58 - Enregistrement des données dans la base de destination...
+2025-02-28 09:08:58 - Réponse reçue, statut: OK
+2025-02-28 09:08:58 - Récupération terminée. 5 produits trouvés.
+2025-02-28 09:08:58 - Enregistrement des données dans la base de destination...
+2025-02-28 09:08:58 - Données insérées avec JSON_KEYU: 67, 5 éléments
+2025-02-28 09:08:58 - Enregistrement terminé avec succès.
+2025-02-28 09:08:58 - Données insérées avec JSON_KEYU: 68, 5 éléments
+2025-02-28 09:08:58 - Enregistrement terminé avec succès.
+2025-02-28 09:09:00 - Transfert terminé avec succès pour ReleasedProductsV2. 5 enregistrements.
+2025-02-28 09:09:01 - Transfert terminé avec succès pour ReleasedProductsV2. 5 enregistrements.
+2025-03-10 13:34:24 - Début du transfert pour: ReleasedProductsV2
+2025-03-10 13:34:24 - Transfert en cours pour ReleasedProductsV2...
+2025-03-10 13:34:24 - Récupération des produits depuis Dynamics 365...
+2025-03-10 13:34:24 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-03-10 13:34:24 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-03-10 13:34:24 - Demande d'un nouveau token OAuth
+2025-03-10 13:34:24 - Début du transfert pour: ReleasedProductsV2
+2025-03-10 13:34:24 - Transfert en cours pour ReleasedProductsV2...
+2025-03-10 13:34:24 - Récupération des produits depuis Dynamics 365...
+2025-03-10 13:34:24 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-03-10 13:34:24 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-03-10 13:34:24 - Demande d'un nouveau token OAuth
+2025-03-10 13:34:24 - ERREUR [Obtention du token OAuth]
+Message: Response status code does not indicate success: 401 (Unauthorized).
+StackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:24 - ERREUR [GetDataAsync pour ReleasedProductsV2?cross-company=true&$top=1]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+InnerException: Response status code does not indicate success: 401 (Unauthorized).
+InnerStackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:24 - ERREUR [GetReleasedProductsAsync]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 218
+InnerException: Response status code does not indicate success: 401 (Unauthorized).
+InnerStackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR [Transfert ReleasedProductsV2]
+Message: Erreur lors de la récupération des produits depuis Dynamics 365
+StackTrace:    at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 242
+   at POMsag.Form1.ButtonTransfer_Click(Object sender, EventArgs e) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Form1.cs:line 132
+InnerException: Erreur lors de l'obtention du token d'authentification
+InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 218
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR: Erreur lors de la récupération des produits depuis Dynamics 365
+2025-03-10 13:34:25 - ERREUR [Obtention du token OAuth]
+Message: Response status code does not indicate success: 401 (Unauthorized).
+StackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR [GetDataAsync pour ReleasedProductsV2?cross-company=true&$top=1]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+InnerException: Response status code does not indicate success: 401 (Unauthorized).
+InnerStackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR [GetReleasedProductsAsync]
+Message: Erreur lors de l'obtention du token d'authentification
+StackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 218
+InnerException: Response status code does not indicate success: 401 (Unauthorized).
+InnerStackTrace:    at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 73
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR [Transfert ReleasedProductsV2]
+Message: Erreur lors de la récupération des produits depuis Dynamics 365
+StackTrace:    at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 242
+   at POMsag.Form1.ButtonTransfer_Click(Object sender, EventArgs e) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Form1.cs:line 132
+InnerException: Erreur lors de l'obtention du token d'authentification
+InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 110
+   at POMsag.Services.DynamicsApiService.GetDataAsync(String endpoint, Dictionary`2 filters) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 130
+   at POMsag.Services.DynamicsApiService.GetReleasedProductsAsync(Nullable`1 startPurchaseDate, Nullable`1 endPurchaseDate) in C:\Users\BDEQUEKER\OneDrive\Bureau\POM\SAG\POM_SAG-V.3\POMsag\Services\DynamicsApiService.cs:line 218
+--------------------------------------------------------------------------------
+2025-03-10 13:34:25 - ERREUR: Erreur lors de la récupération des produits depuis Dynamics 365
