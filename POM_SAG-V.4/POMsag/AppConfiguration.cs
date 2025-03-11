@@ -336,11 +336,35 @@ namespace POMsag
         }
         public void AddOrUpdateApi(ApiConfiguration api)
         {
+            // Créer une nouvelle instance d'API pour éviter le partage de références
+            var apiCopy = new ApiConfiguration(api.ApiId, api.Name, api.BaseUrl)
+            {
+                AuthType = api.AuthType,
+                Headers = new Dictionary<string, string>(api.Headers),
+                AuthParameters = new Dictionary<string, string>(api.AuthParameters)
+            };
+
+            // Copier les endpoints individuellement pour éviter le partage de références
+            apiCopy.Endpoints = new List<ApiEndpoint>();
+            foreach (var endpoint in api.Endpoints)
+            {
+                var endpointCopy = new ApiEndpoint(endpoint.Name, endpoint.Path)
+                {
+                    Method = endpoint.Method,
+                    SupportsDateFiltering = endpoint.SupportsDateFiltering,
+                    DateStartParamName = endpoint.DateStartParamName,
+                    DateEndParamName = endpoint.DateEndParamName,
+                    DateFormat = endpoint.DateFormat
+                };
+                apiCopy.Endpoints.Add(endpointCopy);
+            }
+
+            // Ajouter ou mettre à jour l'API dans la collection
             int index = ConfiguredApis.FindIndex(a => a.ApiId == api.ApiId);
             if (index >= 0)
-                ConfiguredApis[index] = api;
+                ConfiguredApis[index] = apiCopy;
             else
-                ConfiguredApis.Add(api);
+                ConfiguredApis.Add(apiCopy);
 
             SaveApiConfigurations();
         }
@@ -355,5 +379,7 @@ namespace POMsag
         {
             return ConfiguredApis.FirstOrDefault(a => a.ApiId == apiId);
         }
+
+
     }
 }

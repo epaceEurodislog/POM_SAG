@@ -130,76 +130,93 @@ namespace POMsag
                 comboBoxApi.SelectedIndexChanged -= ComboBoxApi_SelectedIndexChanged;
             }
 
-            // Création de comboBoxApi s'il n'existe pas déjà
-            if (comboBoxApi == null)
-            {
-                comboBoxApi = new ComboBox
-                {
-                    Name = "comboBoxApi",
-                    Location = new Point(120, 80),
-                    Size = new Size(250, 30),
-                    DropDownStyle = ComboBoxStyle.DropDownList
-                };
-                this.Controls.Add(comboBoxApi);
-            }
-
-            // Réorganiser le contenu des panneaux
+            // Trouver le panneau de sélection de données
             var dataSelectionPanel = FindDataSelectionPanel();
             if (dataSelectionPanel != null)
             {
                 dataSelectionPanel.Controls.Clear();
                 dataSelectionPanel.Padding = new Padding(20);
-                dataSelectionPanel.Height = 280;
+                dataSelectionPanel.Height = 400; // Augmenter la hauteur pour éviter les superpositions
+
+                // Créer un TableLayoutPanel pour organiser tous les contrôles
+                var mainLayout = new TableLayoutPanel
+                {
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    RowCount = 5, // Titre + API/Endpoint + DateFilter + DatePicker + Espacement
+                    AutoSize = true
+                };
+
+                // Définir les hauteurs des lignes
+                mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 50)); // Titre
+                mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 100)); // API/Endpoint
+                mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 40)); // DateFilter
+                mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 60)); // DatePicker
+                mainLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100)); // Espace restant
 
                 // Titre de section
                 var labelSelect = new Label
                 {
                     Text = "Sélectionnez les données à transférer",
-                    Dock = DockStyle.Top,
-                    Height = 40,
+                    Dock = DockStyle.Fill,
                     Font = new Font("Segoe UI", 14, FontStyle.Regular),
-                    ForeColor = ColorPalette.PrimaryText
+                    ForeColor = ColorPalette.PrimaryText,
+                    TextAlign = ContentAlignment.MiddleLeft
                 };
-                dataSelectionPanel.Controls.Add(labelSelect);
 
                 // Créer un TableLayoutPanel pour organiser les contrôles d'API et d'endpoints
-                var tableLayout = new TableLayoutPanel
+                var apiEndpointLayout = new TableLayoutPanel
                 {
-                    Dock = DockStyle.Top,
-                    Height = 100,
+                    Dock = DockStyle.Fill,
                     ColumnCount = 2,
                     RowCount = 2,
                     Padding = new Padding(0, 10, 0, 10)
                 };
 
-                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25));
-                tableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 75));
-                tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
-                tableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+                apiEndpointLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120)); // Labels
+                apiEndpointLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); // Comboboxes
+                apiEndpointLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
+                apiEndpointLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 50));
 
                 // Label API Source
                 var labelApi = new Label
                 {
                     Text = "API Source :",
-                    Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                    TextAlign = ContentAlignment.MiddleLeft,
+                    Anchor = AnchorStyles.Left,
+                    AutoSize = true,
                     Font = new Font("Segoe UI", 12, FontStyle.Regular),
                     ForeColor = ColorPalette.PrimaryText
                 };
 
-                // Configuration de comboBoxApi
-                comboBoxApi.Dock = DockStyle.Fill;
-                comboBoxApi.DropDownStyle = ComboBoxStyle.DropDownList;
-                comboBoxApi.BackColor = ColorPalette.SecondaryBackground;
-                comboBoxApi.ForeColor = ColorPalette.PrimaryText;
-                comboBoxApi.Font = new Font("Segoe UI", 12, FontStyle.Regular);
+                // Configuration de comboBoxApi s'il n'existe pas déjà
+                if (comboBoxApi == null)
+                {
+                    comboBoxApi = new ComboBox
+                    {
+                        Name = "comboBoxApi",
+                        Dock = DockStyle.Fill,
+                        DropDownStyle = ComboBoxStyle.DropDownList,
+                        BackColor = ColorPalette.SecondaryBackground,
+                        ForeColor = ColorPalette.PrimaryText,
+                        Font = new Font("Segoe UI", 12, FontStyle.Regular)
+                    };
+                }
+                else
+                {
+                    // Reconfigurer comboBoxApi existant
+                    comboBoxApi.Dock = DockStyle.Fill;
+                    comboBoxApi.DropDownStyle = ComboBoxStyle.DropDownList;
+                    comboBoxApi.BackColor = ColorPalette.SecondaryBackground;
+                    comboBoxApi.ForeColor = ColorPalette.PrimaryText;
+                    comboBoxApi.Font = new Font("Segoe UI", 12, FontStyle.Regular);
+                }
 
                 // Label Endpoint
                 var labelEndpoint = new Label
                 {
                     Text = "Endpoint :",
-                    Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                    TextAlign = ContentAlignment.MiddleLeft,
+                    Anchor = AnchorStyles.Left,
+                    AutoSize = true,
                     Font = new Font("Segoe UI", 12, FontStyle.Regular),
                     ForeColor = ColorPalette.PrimaryText
                 };
@@ -211,56 +228,71 @@ namespace POMsag
                 comboBoxTables.ForeColor = ColorPalette.PrimaryText;
                 comboBoxTables.Font = new Font("Segoe UI", 12, FontStyle.Regular);
 
-                // Ajouter les contrôles au TableLayoutPanel
-                tableLayout.Controls.Add(labelApi, 0, 0);
-                tableLayout.Controls.Add(comboBoxApi, 1, 0);
-                tableLayout.Controls.Add(labelEndpoint, 0, 1);
-                tableLayout.Controls.Add(comboBoxTables, 1, 1);
+                // Ajouter les contrôles au TableLayoutPanel pour API/Endpoint
+                apiEndpointLayout.Controls.Add(labelApi, 0, 0);
+                apiEndpointLayout.Controls.Add(comboBoxApi, 1, 0);
+                apiEndpointLayout.Controls.Add(labelEndpoint, 0, 1);
+                apiEndpointLayout.Controls.Add(comboBoxTables, 1, 1);
 
-                dataSelectionPanel.Controls.Add(tableLayout);
+                // Panel pour le filtre de date avec CheckBox
+                var dateFilterPanel = new Panel
+                {
+                    Dock = DockStyle.Fill,
+                    Padding = new Padding(0, 5, 0, 5)
+                };
 
                 // Amélioration des contrôles de filtre de date
                 checkBoxDateFilter.Text = "Filtrer par date";
-                checkBoxDateFilter.Dock = DockStyle.Top;
-                checkBoxDateFilter.Height = 30;
+                checkBoxDateFilter.AutoSize = true;
                 checkBoxDateFilter.Font = new Font("Segoe UI", 12);
                 checkBoxDateFilter.ForeColor = ColorPalette.PrimaryText;
-                checkBoxDateFilter.Margin = new Padding(0, 10, 0, 10);
-                dataSelectionPanel.Controls.Add(checkBoxDateFilter);
+                checkBoxDateFilter.Margin = new Padding(0, 5, 0, 5);
+                checkBoxDateFilter.Location = new Point(0, 5);
+                dateFilterPanel.Controls.Add(checkBoxDateFilter);
 
-                // Panel pour les dates
-                var dateFilterPanel = new Panel
+                // Panel pour les DateTimePickers
+                var datePickerPanel = new TableLayoutPanel
                 {
-                    Dock = DockStyle.Top,
-                    Height = 50,
-                    BackColor = ColorPalette.SecondaryBackground,
-                    Margin = new Padding(0, 5, 0, 10)
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 3, // Date début + label + Date fin
+                    RowCount = 1,
+                    BackColor = ColorPalette.SecondaryBackground
                 };
 
+                datePickerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45)); // Date début
+                datePickerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 50)); // Label "au"
+                datePickerPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45)); // Date fin
+
                 // Amélioration des DateTimePickers
-                dateTimePickerStart.Dock = DockStyle.Left;
-                dateTimePickerStart.Width = 220;
+                dateTimePickerStart.Dock = DockStyle.Fill;
                 dateTimePickerStart.Format = DateTimePickerFormat.Short;
                 dateTimePickerStart.Font = new Font("Segoe UI", 12);
 
                 var labelTo = new Label
                 {
                     Text = "au",
-                    AutoSize = true,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Dock = DockStyle.Fill,
                     Font = new Font("Segoe UI", 12),
-                    Location = new Point(230, 15),
+                    ForeColor = ColorPalette.PrimaryText
                 };
 
-                dateTimePickerEnd.Dock = DockStyle.Right;
-                dateTimePickerEnd.Width = 220;
+                dateTimePickerEnd.Dock = DockStyle.Fill;
                 dateTimePickerEnd.Format = DateTimePickerFormat.Short;
                 dateTimePickerEnd.Font = new Font("Segoe UI", 12);
 
-                dateFilterPanel.Controls.Add(labelTo);
-                dateFilterPanel.Controls.Add(dateTimePickerStart);
-                dateFilterPanel.Controls.Add(dateTimePickerEnd);
+                datePickerPanel.Controls.Add(dateTimePickerStart, 0, 0);
+                datePickerPanel.Controls.Add(labelTo, 1, 0);
+                datePickerPanel.Controls.Add(dateTimePickerEnd, 2, 0);
 
-                dataSelectionPanel.Controls.Add(dateFilterPanel);
+                // Ajouter tous les panels au layout principal
+                mainLayout.Controls.Add(labelSelect, 0, 0);
+                mainLayout.Controls.Add(apiEndpointLayout, 0, 1);
+                mainLayout.Controls.Add(dateFilterPanel, 0, 2);
+                mainLayout.Controls.Add(datePickerPanel, 0, 3);
+
+                // Ajouter le layout principal au panel de sélection de données
+                dataSelectionPanel.Controls.Add(mainLayout);
 
                 // Amélioration du bouton de transfert
                 buttonTransfer.Text = "Démarrer le transfert";
@@ -272,7 +304,7 @@ namespace POMsag
                 buttonTransfer.FlatStyle = FlatStyle.Flat;
                 buttonTransfer.FlatAppearance.BorderSize = 0;
                 buttonTransfer.FlatAppearance.MouseOverBackColor = Color.FromArgb(62, 142, 208);
-                buttonTransfer.Margin = new Padding(0, 20, 0, 0);
+                buttonTransfer.Margin = new Padding(20);
             }
 
             // Remplir le combobox API
@@ -306,7 +338,8 @@ namespace POMsag
         }
 
         // Méthode pour mettre à jour la liste des endpoints
-        private void UpdateEndpointsList()
+        // Méthode pour mettre à jour la liste des endpoints
+        public void UpdateEndpointsList()
         {
             comboBoxTables.Items.Clear();
 
@@ -325,6 +358,28 @@ namespace POMsag
 
             // Mettre à jour l'état du bouton de transfert
             buttonTransfer.Enabled = comboBoxTables.Items.Count > 0 && !_isTransferInProgress;
+        }
+
+        // Ajoutez cette méthode si elle n'existe pas déjà
+        private void ApiManager_Closed(object sender, EventArgs e)
+        {
+            // Mettre à jour la liste des API dans le combobox
+            comboBoxApi.Items.Clear();
+            foreach (var api in _configuration.ConfiguredApis)
+            {
+                comboBoxApi.Items.Add(api.Name);
+            }
+
+            if (comboBoxApi.Items.Count > 0)
+            {
+                // Conserver la sélection actuelle si possible
+                string currentApiName = comboBoxApi.SelectedItem?.ToString();
+                int newIndex = currentApiName != null ? comboBoxApi.Items.IndexOf(currentApiName) : 0;
+                comboBoxApi.SelectedIndex = newIndex >= 0 ? newIndex : 0;
+            }
+
+            // Mettre à jour la liste des endpoints
+            UpdateEndpointsList();
         }
 
         // Méthode pour réagir au changement d'API
@@ -359,12 +414,7 @@ namespace POMsag
                 using (var apiManagerForm = new ApiManagerForm(_configuration))
                 {
                     apiManagerForm.ShowDialog();
-
-                    // Mettre à jour le service générique
-                    _genericApiService = new GenericApiService(_configuration);
-
-                    // Rafraichir les combobox
-                    InitializeControls();
+                    RefreshAfterApiManagerClosed();
                 }
             };
 
@@ -378,6 +428,30 @@ namespace POMsag
                 )
             );
             contextMenu.Show(this, menuLocation);
+        }
+
+        private void RefreshAfterApiManagerClosed()
+        {
+            // Mettre à jour le service générique
+            _genericApiService = new GenericApiService(_configuration);
+
+            // Mettre à jour les listes
+            comboBoxApi.Items.Clear();
+            foreach (var api in _configuration.ConfiguredApis)
+            {
+                comboBoxApi.Items.Add(api.Name);
+            }
+
+            if (comboBoxApi.Items.Count > 0)
+            {
+                // Conserver la sélection actuelle si possible
+                string currentApiName = comboBoxApi.SelectedItem?.ToString();
+                int newIndex = currentApiName != null ? comboBoxApi.Items.IndexOf(currentApiName) : 0;
+                comboBoxApi.SelectedIndex = newIndex >= 0 ? newIndex : 0;
+            }
+
+            // Mettre à jour la liste des endpoints
+            UpdateEndpointsList();
         }
 
         private void CheckBoxDateFilter_CheckedChanged(object sender, EventArgs e)
