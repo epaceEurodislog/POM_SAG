@@ -86,3 +86,33 @@ appsettings.Production.json
 [Tt]emp/
 .DS_Store
 Thumbs.db
+
+# Exclure les fichiers logs sensibles
+*.log
+*.log.*
+
+# Exclure les fichiers de configuration contenant potentiellement des secrets
+*.env
+.env.*
+*.secret
+secrets.json
+config.json
+credentials.json
+
+# Exclure les fichiers API et tokens
+*.pem
+*.key
+*.crt
+*.pfx
+*.cer
+*.der
+*.cert
+*.csr
+*.ovpn
+*.enc
+*.p12
+
+# Exclure les fichiers avec identifiants ou accès
+id_rsa
+id_rsa.pub
+known_hosts
