@@ -298,7 +298,7 @@ namespace POMsag
         private DateTimePicker dateTimePickerStart;
         private DateTimePicker dateTimePickerEnd;
         private Panel statusPanel;
-        private TextBox statusTextBox;
+        private RichTextBox statusTextBox;
 
         // Contrôles de menu
         private MenuStrip mainMenu;
