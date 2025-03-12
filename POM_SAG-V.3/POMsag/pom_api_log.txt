@@ -675,3 +675,33 @@ InnerStackTrace:    at POMsag.Services.DynamicsApiService.GetTokenAsync() in C:\
 2025-03-12 09:18:53 - Données insérées avec JSON_KEYU: 2, 1 éléments
 2025-03-12 09:18:53 - Enregistrement terminé avec succès.
 2025-03-12 09:18:55 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-03-12 13:19:45 - Début du transfert pour: ReleasedProductsV2
+2025-03-12 13:19:45 - Transfert en cours pour ReleasedProductsV2...
+2025-03-12 13:19:45 - Récupération des produits depuis Dynamics 365...
+2025-03-12 13:19:45 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-03-12 13:19:45 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-03-12 13:19:45 - Demande d'un nouveau token OAuth
+2025-03-12 13:19:45 - Début du transfert pour: ReleasedProductsV2
+2025-03-12 13:19:45 - Transfert en cours pour ReleasedProductsV2...
+2025-03-12 13:19:45 - Récupération des produits depuis Dynamics 365...
+2025-03-12 13:19:45 - URL de requête OData: ReleasedProductsV2?cross-company=true&$top=1
+2025-03-12 13:19:45 - Préparation requête GET vers: https://br-uat.sandbox.operations.eu.dynamics.com/data/ReleasedProductsV2?cross-company=true&$top=1
+2025-03-12 13:19:45 - Demande d'un nouveau token OAuth
+2025-03-12 13:19:45 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-03-12 13:19:45 - Token OAuth obtenu, valide jusqu'à 12/03/2025 14:18:44
+2025-03-12 13:19:45 - Envoi de la requête GET
+2025-03-12 13:19:45 - Réponse du serveur OAuth reçue: {"token_type":"Bearer","expires_in":"3599","ext_ex...
+2025-03-12 13:19:45 - Token OAuth obtenu, valide jusqu'à 12/03/2025 14:18:44
+2025-03-12 13:19:45 - Envoi de la requête GET
+2025-03-12 13:20:09 - Réponse reçue, statut: OK
+2025-03-12 13:20:09 - Récupération terminée. 1 produits trouvés.
+2025-03-12 13:20:09 - Enregistrement des données dans la base de destination...
+2025-03-12 13:20:10 - Données insérées avec JSON_KEYU: 5, 1 éléments
+2025-03-12 13:20:10 - Enregistrement terminé avec succès.
+2025-03-12 13:20:13 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.
+2025-03-12 13:20:31 - Réponse reçue, statut: OK
+2025-03-12 13:20:31 - Récupération terminée. 1 produits trouvés.
+2025-03-12 13:20:31 - Enregistrement des données dans la base de destination...
+2025-03-12 13:20:31 - Données insérées avec JSON_KEYU: 6, 1 éléments
+2025-03-12 13:20:31 - Enregistrement terminé avec succès.
+2025-03-12 13:27:26 - Transfert terminé avec succès pour ReleasedProductsV2. 1 enregistrements.

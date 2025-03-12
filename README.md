@@ -1,163 +1,236 @@
-POM_SAG-V.3 - Outil de Transfert de Données
-📌 Description
-POM_SAG est une application de bureau conçue pour faciliter le transfert des données entre diverses sources (API POM et Dynamics 365 Finance & Operations) et une base de données SQL Server destinataire. Cette application permet la récupération, la transformation et l'enregistrement des données commerciales essentielles telles que les produits, les clients, les commandes et autres informations commerciales.
-🚀 Fonctionnalités principales
+# 🚀 POM_SAG - Outil Professionnel de Transfert de Données
 
-Récupération de données depuis plusieurs sources:
+## 📌 Présentation Générale
 
-API RESTful POM (Clients, Commandes, Produits, LignesCommandes)
-API Dynamics 365 Finance & Operations (ReleasedProductsV2 et autres entités)
+### Définition et Objectif
 
+POM_SAG est une solution logicielle sophistiquée développée pour résoudre les défis complexes de migration et de synchronisation de données commerciales. Conçue spécifiquement pour les entreprises ayant des besoins avancés de transfert de données, cette application offre une approche centralisée, sécurisée et hautement configurable.
 
-Filtrage des données par date:
+### Problématique Résolue
 
-Possibilité de filtrer les données à transférer par plage de dates
+Dans un environnement commercial de plus en plus fragmenté, les entreprises font face à des difficultés majeures :
 
+- Multiplicité des sources de données
+- Incompatibilité des formats
+- Risques de perte ou corruption de données
+- Complexité des processus de migration
 
-Sécurité:
+**POM_SAG répond précisément à ces défis.**
 
-Authentification par clé API pour l'API POM
-Authentification OAuth pour l'API Dynamics 365
+---
 
+## 🌟 Fonctionnalités Détaillées
 
-Stockage flexible:
+### 1. Connectivité Multi-Sources
 
-Enregistrement des données en format JSON dans une base SQL Server
+#### Sources de Données Supportées
 
+- **APIs Commerciales**
+  - API POM
+  - Microsoft Dynamics 365 Finance & Operations
+  - APIs REST personnalisées
+  - Possibilité d'intégration de nouvelles sources via configuration
 
-Interface conviviale:
+#### Types de Données Transférables
 
-Interface graphique intuitive développée avec Windows Forms
-Suivi en temps réel des opérations de transfert
-Journal des opérations pour audit et débogage
+- Données clients
+- Informations de commandes
+- Référentiels produits
+- Lignes de commandes
+- Données financières
+- Entités personnalisées Dynamics
 
+### 2. Filtrage et Transformation Avancés
 
+#### Filtrage Temporel
 
-🔧 Prérequis techniques
+- Sélection de plages de dates précises
+- Granularité au jour près
+- Compatibilité avec multiples formats de dates
+- Gestion des fuseaux horaires
 
-.NET 9.0 ou supérieur
-Windows 10/11 ou Windows Server 2016 ou supérieur
-Accès aux APIs (POM et/ou Dynamics 365)
-SQL Server (version 2016 ou supérieure) pour la base de données de destination
+#### Filtrage Structurel
 
-📥 Installation
+- Sélection granulaire des champs
+- Mapping dynamique des champs
+- Préservation de l'intégrité structurelle des données
+- Transformation et nettoyage des données
 
-Clonez ce dépôt ou téléchargez l'archive:
+---
 
-bashCopygit clone https://github.com/votreorganisation/POM_SAG-V.3.git
+## 🔒 Mécanismes d'Authentification
 
-Ouvrez la solution dans Visual Studio 2022 ou supérieur:
+### Types d'Authentification
 
-CopyPOM_SAG-V.3.sln
+1. **Authentification par Clé API**
 
-Restaurez les packages NuGet nécessaires:
+   - Mécanisme simple et rapide
+   - Support de multiples clés
+   - Rotation sécurisée des clés
+   - Journalisation des accès
 
-bashCopydotnet restore
+2. **OAuth 2.0**
 
-Compilez le projet:
+   - Flux Client Credentials
+   - Gestion automatisée des tokens
+   - Renouvellement transparent
+   - Conformité aux standards de sécurité
 
-bashCopydotnet build --configuration Release
+3. **Authentification Basic**
 
-Exécutez l'application:
+   - Support des APIs traditionnelles
+   - Stockage sécurisé des identifiants
+   - Chiffrement des credentials
 
-bashCopydotnet run --project POMsag/POMsag.csproj
-⚙️ Configuration
-L'application utilise un fichier config.ini qui sera créé automatiquement au premier lancement dans le répertoire de l'application. Vous devrez configurer les paramètres suivants:
-Section [Settings]
+4. **Authentification Personnalisée**
+   - Flexibilité maximale
+   - Adaptabilité à des mécanismes spécifiques
 
-ApiUrl: URL de l'API POM
-ApiKey: Clé d'authentification pour l'API POM
-DatabaseConnectionString: Chaîne de connexion vers la base de données SQL Server destinataire
+---
 
-Section [D365]
+## 💾 Stratégies de Stockage et Transformation
 
-TokenUrl: URL pour l'obtention du jeton OAuth (ex: https://login.microsoftonline.com/{tenant-id}/oauth2/token)
-ClientId: Identifiant de l'application dans Azure AD
-ClientSecret: Secret de l'application dans Azure AD
-Resource: URL de ressource Dynamics 365
-DynamicsApiUrl: URL de l'API Dynamics 365
-MaxRecords: Nombre maximal d'enregistrements à récupérer (0 pour aucune limite)
-SpecificItemNumber: Filtrer par numéro d'article spécifique (optionnel)
+### Approche de Stockage
 
-🔄 Processus de transfert
+- Enregistrement au format JSON
+- Table SQL dédiée `JSON_DAT`
+- Horodatage automatique
+- Traçabilité complète des transferts
 
-Sélectionnez le type de données à transférer (Clients, Commandes, Produits, ReleasedProductsV2, etc.)
-Activez ou désactivez le filtrage par date si nécessaire
-Cliquez sur "Démarrer le transfert"
-L'application récupère les données depuis la source appropriée
-Les données sont transformées au format JSON
-Les données sont enregistrées dans la table JSON_DAT de la base SQL destinataire
-Un rapport de succès est affiché avec le nombre d'enregistrements transférés
+### Processus de Transformation
 
-🗂️ Structure du projet
-CopyPOMsag/
-├── Models/            # Modèles de données
-│   ├── ReleasedProduct.cs
-│   └── ...
-├── Services/          # Services métier
-│   ├── DynamicsApiService.cs    # Connexion à l'API Dynamics 365
-│   ├── LoggerService.cs         # Service de journalisation
-│   └── ...
-├── AppConfiguration.cs   # Gestion de la configuration
-├── Form1.cs              # Formulaire principal
-├── ConfigurationForm.cs  # Formulaire de configuration
-├── Program.cs            # Point d'entrée de l'application
-└── ...
-📋 Logging
-L'application génère des logs détaillés dans le fichier pom_api_log.txt situé dans le répertoire de l'application. Ces logs incluent:
+- Conversion automatique inter-formats
+- Nettoyage et normalisation
+- Détection et gestion des anomalies
+- Préservation des métadonnées
 
-Les requêtes effectuées
-Les réponses reçues (tronquées pour les grandes quantités de données)
-Les erreurs rencontrées
-Les opérations de base de données réussies
+---
 
-🔒 Sécurité
+## 🖥️ Interface Utilisateur
 
-Les clés API et secrets sont stockés localement dans le fichier de configuration
-Aucune information sensible n'est transmise en dehors des canaux sécurisés
-Les connexions aux APIs utilisent des mécanismes d'authentification sécurisés (API Keys, OAuth 2.0)
+### Tableau de Bord Principal
 
-⚠️ Résolution des problèmes courants
+- Sélection intuitive des sources
+- Suivi en temps réel des transferts
+- Indicateurs de progression dynamiques
+- Journalisation instantanée
 
-Erreur de connexion à l'API POM:
+### Configurations Avancées
 
-Vérifiez que l'URL et la clé API sont correctes dans la configuration
-Assurez-vous que le serveur API est en fonctionnement
+- Éditeur d'APIs dynamique
+- Configuration fine des endpoints
+- Gestion des préférences de transfert
+- Outils de test de connexion intégrés
 
+---
 
-Erreur d'authentification Dynamics 365:
+## 📊 Fonctionnalités de Reporting
 
-Vérifiez les informations ClientId, ClientSecret et TokenUrl
-Assurez-vous que l'application dispose des permissions appropriées
+### Logs Détaillés
 
+- Journalisation complète des opérations
+- Horodatage précis
+- Enregistrement des erreurs
+- Traçabilité exhaustive
 
-Erreur de connexion à la base de données:
+### Rapports Générés
 
-Vérifiez la chaîne de connexion dans la configuration
-Assurez-vous que le serveur SQL est accessible et que l'utilisateur dispose des droits nécessaires
+- Nombre d'enregistrements transférés
+- Durée des transferts
+- Détails des erreurs
+- Statistiques de performance
 
+---
 
-Aucune donnée récupérée:
+## 🛡️ Sécurité et Fiabilité
 
-Vérifiez les filtres de date si activés
-Consultez les logs pour identifier d'éventuelles erreurs
-Vérifiez le paramètre MaxRecords dans la configuration
+### Gestion des Erreurs
 
+- Mécanisme de reprise
+- Validation pré-transfert
+- Rollback partiel
+- Notifications d'incidents
 
+### Sécurité des Données
 
-🛠️ Technologies utilisées
+- Chiffrement des identifiants
+- Stockage sécurisé
+- Validation des certificats
+- Gestion sécurisée des tokens
 
-C# .NET 9.0
-Windows Forms pour l'interface utilisateur
-HTTP Client pour les communications API
-Microsoft.Data.SqlClient pour les connexions SQL Server
-INI-Parser pour la gestion de la configuration
-System.Text.Json pour le traitement JSON
+---
 
-🔄 Mise à jour
-Pour mettre à jour l'application vers une nouvelle version:
+## 🔧 Prérequis Techniques
 
-Sauvegardez votre fichier de configuration config.ini
-Téléchargez ou clonez la dernière version
-Remplacez le fichier config.ini par votre fichier sauvegardé
-Compilez et exécutez la nouvelle version
+### Environnement Système
+
+- Windows 10/11
+- Windows Server 2019/2022
+- .NET 9.0+
+- SQL Server 2016+
+
+### Pré-requis Logiciels
+
+- Visual Studio 2022 (développement)
+- Accès réseau configuré
+- Droits d'administration recommandés
+
+---
+
+## 💻 Installation et Configuration
+
+### Étapes d'Installation
+
+1. **Prérequis**
+
+   ```bash
+   # Vérifier l'installation de .NET
+   dotnet --version
+   ```
+
+2. **Récupération du Projet**
+
+   ```bash
+   git clone https://github.com/votre-organisation/POM_SAG.git
+   cd POM_SAG
+   ```
+
+3. **Préparation**
+
+   ```bash
+   # Restauration des dépendances
+   dotnet restore
+
+   # Compilation
+   dotnet build --configuration Release
+   ```
+
+4. **Configuration**
+
+   - Éditer `config.ini`
+   - Configurer les connexions API
+   - Définir les paramètres de transfert
+
+5. **Lancement**
+   ```bash
+   dotnet run --project POMsag/POMsag.csproj
+   ```
+
+---
+
+## 🌐 Interopérabilité
+
+### Standards Supportés
+
+- REST API
+- OData
+- JSON
+- XML (support limité)
+
+### Compatibilités
+
+- APIs cloud
+- Systèmes sur site
+- Environnements hybrides
+
+---
