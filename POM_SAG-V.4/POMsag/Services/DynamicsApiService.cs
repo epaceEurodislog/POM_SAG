@@ -61,48 +61,65 @@ namespace POMsag.Services
                 // Préparer la requête pour obtenir le token
                 var requestContent = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", _clientId),
-                    new KeyValuePair<string, string>("client_secret", _clientSecret),
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("resource", _resource)
-                });
+            new KeyValuePair<string, string>("client_id", _clientId),
+            new KeyValuePair<string, string>("client_secret", _clientSecret),
+            new KeyValuePair<string, string>("grant_type", "client_credentials"),
+            new KeyValuePair<string, string>("resource", _resource)
+        });
+
+                // Utiliser un HttpClientHandler pour ignorer les erreurs de certificat
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
 
                 // Envoyer la requête
-                var client = new HttpClient(); // Créer un nouveau client pour cette requête
-                var response = await client.PostAsync(_tokenUrl, requestContent);
-                response.EnsureSuccessStatusCode();
-
-                // Traiter la réponse
-                var responseContent = await response.Content.ReadAsStringAsync();
-                LoggerService.Log($"Réponse du serveur OAuth reçue: {responseContent.Substring(0, Math.Min(50, responseContent.Length))}...");
-
-                var tokenResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
-
-                // Extraire les informations du token
-                _accessToken = tokenResponse.GetProperty("access_token").GetString();
-
-                // Traiter le champ "expires_in" qui peut être un nombre ou une chaîne
-                int expiresIn;
-                var expiresInProp = tokenResponse.GetProperty("expires_in");
-
-                if (expiresInProp.ValueKind == JsonValueKind.String)
+                using (var client = new HttpClient(handler))
                 {
-                    // Si c'est une chaîne, la convertir en entier
-                    if (int.TryParse(expiresInProp.GetString(), out int result))
-                        expiresIn = result;
+                    var response = await client.PostAsync(_tokenUrl, requestContent);
+                    response.EnsureSuccessStatusCode();
+
+                    // Traiter la réponse
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    LoggerService.Log($"Réponse du serveur OAuth reçue: {responseContent.Substring(0, Math.Min(50, responseContent.Length))}...");
+
+                    var tokenResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
+
+                    // Extraction sécurisée des informations du token
+                    if (!tokenResponse.TryGetProperty("access_token", out JsonElement accessTokenElement))
+                    {
+                        throw new Exception("La propriété 'access_token' est absente de la réponse");
+                    }
+                    _accessToken = accessTokenElement.GetString();
+
+                    // Traiter le champ "expires_in" qui peut être un nombre ou une chaîne
+                    int expiresIn;
+                    if (tokenResponse.TryGetProperty("expires_in", out JsonElement expiresInProp))
+                    {
+                        if (expiresInProp.ValueKind == JsonValueKind.String)
+                        {
+                            // Si c'est une chaîne, la convertir en entier
+                            if (int.TryParse(expiresInProp.GetString(), out int result))
+                                expiresIn = result;
+                            else
+                                expiresIn = 3599; // Valeur par défaut d'une heure moins une seconde
+                        }
+                        else
+                        {
+                            // Si c'est déjà un nombre
+                            expiresIn = expiresInProp.GetInt32();
+                        }
+                    }
                     else
-                        expiresIn = 3599; // Valeur par défaut d'une heure moins une seconde
-                }
-                else
-                {
-                    // Si c'est déjà un nombre
-                    expiresIn = expiresInProp.GetInt32();
-                }
+                    {
+                        expiresIn = 3599; // Valeur par défaut si la propriété est absente
+                    }
 
-                _tokenExpiry = DateTime.Now.AddSeconds(expiresIn - 60); // Marge de sécurité d'une minute
+                    _tokenExpiry = DateTime.Now.AddSeconds(expiresIn - 60); // Marge de sécurité d'une minute
 
-                LoggerService.Log($"Token OAuth obtenu, valide jusqu'à {_tokenExpiry}");
-                return _accessToken;
+                    LoggerService.Log($"Token OAuth obtenu, valide jusqu'à {_tokenExpiry}");
+                    return _accessToken;
+                }
             }
             catch (Exception ex)
             {

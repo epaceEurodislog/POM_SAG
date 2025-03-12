@@ -390,14 +390,27 @@ namespace POMsag
 
         private void ConfigButton_Click(object sender, EventArgs e)
         {
-            // Remplacer l'ancien code avec menu contextuel par:
-            using (var configForm = new ConfigurationForm(_configuration))
+            try
             {
-                configForm.ShowDialog();
+                // Ouvrir le formulaire de configuration unifié
+                using (var configForm = new ConfigurationForm(_configuration))
+                {
+                    configForm.ShowDialog();
 
-                // Mettre à jour la configuration après fermeture du formulaire
-                InitializeHttpClient();
-                InitializeControls();
+                    // Mettre à jour la configuration après fermeture du formulaire
+                    InitializeHttpClient();
+                    InitializeControls();
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "Erreur lors de l'ouverture du formulaire de configuration");
+                MessageBox.Show(
+                    $"Erreur lors de l'ouverture de la configuration : {ex.Message}",
+                    "Erreur",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
 

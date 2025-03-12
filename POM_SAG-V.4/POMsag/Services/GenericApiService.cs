@@ -92,6 +92,12 @@ namespace POMsag.Services
             LoggerService.Log($"Méthode: {endpoint.Method}");
             LoggerService.Log($"Supporte filtrage par date: {endpoint.SupportsDateFiltering}");
 
+            // Traitement spécial pour Dynamics 365
+            if (apiId == "dynamics")
+            {
+                return await FetchDataFromDynamicsAsync(api, endpoint, startDate, endDate);
+            }
+
             try
             {
                 // Configuration du client HTTP avec gestion des certificats
@@ -124,19 +130,18 @@ namespace POMsag.Services
                     LoggerService.Log($"Date de début formatée: {startDateStr}");
                     LoggerService.Log($"Date de fin formatée: {endDateStr}");
 
-                    queryParams.Add($"$filter=PurchasePriceDate ge {startDateStr} and PurchasePriceDate le {endDateStr}");
+                    // Construction correcte du filtre de date en utilisant les paramètres de l'endpoint
+                    if (!string.IsNullOrEmpty(endpoint.DateStartParamName) && !string.IsNullOrEmpty(endpoint.DateEndParamName))
+                    {
+                        queryParams.Add($"{endpoint.DateStartParamName}={startDateStr}");
+                        queryParams.Add($"{endpoint.DateEndParamName}={endDateStr}");
+                    }
                 }
 
                 // Limite des enregistrements
                 int maxRecords = _configuration.MaxRecords > 0 ? _configuration.MaxRecords : 500;
-                queryParams.Add($"$top={maxRecords}");
+                queryParams.Add($"limit={maxRecords}");
                 LoggerService.Log($"Nombre maximal d'enregistrements : {maxRecords}");
-
-                // Ajout des paramètres cross-company pour Dynamics
-                if (apiId == "dynamics")
-                {
-                    queryParams.Insert(0, "cross-company=true");
-                }
 
                 // Ajout des paramètres à l'URL
                 if (queryParams.Any())
@@ -190,44 +195,28 @@ namespace POMsag.Services
                     ReadCommentHandling = JsonCommentHandling.Skip
                 };
 
-                // Gestion spécifique pour Dynamics
-                if (apiId == "dynamics")
-                {
-                    try
-                    {
-                        using (var doc = JsonDocument.Parse(content))
-                        {
-                            if (doc.RootElement.TryGetProperty("value", out JsonElement valueElement))
-                            {
-                                var items = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
-                                    valueElement.GetRawText(),
-                                    options
-                                ) ?? new List<Dictionary<string, object>>();
-
-                                LoggerService.Log($"Nombre d'éléments récupérés : {items.Count}");
-                                LoggerService.Log("-------- FIN DE FETCHDATAASYNC --------");
-                                return items;
-                            }
-                            else
-                            {
-                                LoggerService.Log("ERREUR : Propriété 'value' non trouvée dans la réponse JSON Dynamics");
-                                throw new Exception("Format de réponse Dynamics invalide");
-                            }
-                        }
-                    }
-                    catch (JsonException ex)
-                    {
-                        LoggerService.LogException(ex, "Erreur lors de la désérialisation JSON Dynamics");
-                        LoggerService.Log($"Contenu problématique :\n{content}");
-                        throw;
-                    }
-                }
-
                 // Désérialisation standard
                 var result = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(content, options)
                              ?? new List<Dictionary<string, object>>();
 
                 LoggerService.Log($"Nombre d'éléments récupérés : {result.Count}");
+
+                // Ajouter des logs pour examiner les données
+                if (result.Count > 0)
+                {
+                    // Échantillon du premier élément pour débogage
+                    var firstItem = result[0];
+                    LoggerService.Log("Premier élément récupéré (échantillon) :");
+                    foreach (var kvp in firstItem.Take(5)) // Limiter à 5 champs pour éviter des logs trop volumineux
+                    {
+                        LoggerService.Log($"  - {kvp.Key}: {kvp.Value}");
+                    }
+                }
+                else
+                {
+                    LoggerService.Log("ATTENTION : Aucun élément récupéré de l'API !");
+                }
+
                 LoggerService.Log("-------- FIN DE FETCHDATAASYNC (Standard) --------");
                 return result;
             }
@@ -251,10 +240,10 @@ namespace POMsag.Services
                     string[] requiredParams = { "TokenUrl", "ClientId", "ClientSecret", "Resource" };
                     foreach (var param in requiredParams)
                     {
-                        if (!api.AuthParameters.ContainsKey(param))
+                        if (!api.AuthParameters.ContainsKey(param) || string.IsNullOrEmpty(api.AuthParameters[param]))
                         {
-                            LoggerService.Log($"ERREUR : Paramètre OAuth {param} manquant");
-                            throw new ArgumentException($"Paramètre OAuth {param} manquant dans la configuration");
+                            LoggerService.Log($"ERREUR : Paramètre OAuth {param} manquant ou vide");
+                            throw new ArgumentException($"Paramètre OAuth {param} manquant ou vide dans la configuration");
                         }
                     }
 
@@ -281,8 +270,13 @@ namespace POMsag.Services
 
                     LoggerService.Log("Demande d'un nouveau token OAuth");
 
-                    // Préparation de la requête de token
-                    using var tokenClient = new HttpClient();
+                    // Préparation de la requête de token avec un handler spécial pour ignorer les erreurs SSL
+                    var handler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                    };
+
+                    using var tokenClient = new HttpClient(handler);
 
                     var values = new Dictionary<string, string>
             {
@@ -299,16 +293,40 @@ namespace POMsag.Services
                     var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
 
                     LoggerService.Log($"Statut de la réponse du token : {tokenResponse.StatusCode}");
-                    LoggerService.Log($"Début du contenu de la réponse : {tokenContent.Substring(0, Math.Min(500, tokenContent.Length))}");
+
+                    // Journaliser une version tronquée pour éviter des logs trop volumineux
+                    if (tokenContent.Length > 0)
+                    {
+                        LoggerService.Log($"Début du contenu de la réponse : {tokenContent.Substring(0, Math.Min(500, tokenContent.Length))}");
+                    }
+                    else
+                    {
+                        LoggerService.Log("Réponse token vide!");
+                    }
 
                     // Vérification du succès de la requête
-                    tokenResponse.EnsureSuccessStatusCode();
+                    if (!tokenResponse.IsSuccessStatusCode)
+                    {
+                        LoggerService.Log($"ERREUR lors de l'obtention du token: {tokenResponse.StatusCode} - {tokenContent}");
+                        throw new Exception($"Erreur lors de l'obtention du token: {tokenResponse.StatusCode} - {tokenContent}");
+                    }
 
                     // Analyse du token
                     using var tokenDoc = JsonDocument.Parse(tokenContent);
 
                     // Extraction du token d'accès
-                    token = tokenDoc.RootElement.GetProperty("access_token").GetString();
+                    if (!tokenDoc.RootElement.TryGetProperty("access_token", out JsonElement accessTokenElement))
+                    {
+                        LoggerService.Log("ERREUR: Propriété 'access_token' non trouvée dans la réponse");
+                        throw new Exception("Le token d'accès est manquant dans la réponse");
+                    }
+
+                    token = accessTokenElement.GetString();
+                    if (string.IsNullOrEmpty(token))
+                    {
+                        LoggerService.Log("ERREUR: Token d'accès vide");
+                        throw new Exception("Token d'accès vide reçu");
+                    }
 
                     // Gestion de l'expiration du token
                     var expiresIn = 3600; // Valeur par défaut (1 heure)
@@ -340,6 +358,41 @@ namespace POMsag.Services
                     LoggerService.LogException(ex, $"Erreur lors de l'authentification OAuth2 pour {api.Name}");
                     throw;
                 }
+            }
+            else if (api.AuthType == AuthenticationType.ApiKey)
+            {
+                LoggerService.Log("Authentification par clé API");
+
+                if (api.AuthParameters.TryGetValue("HeaderName", out string headerName) &&
+                    api.AuthParameters.TryGetValue("Value", out string value))
+                {
+                    client.DefaultRequestHeaders.Add(headerName, value);
+                    LoggerService.Log($"En-tête {headerName} ajouté à la requête");
+                }
+                else
+                {
+                    LoggerService.Log("AVERTISSEMENT: Paramètres de clé API incomplets");
+                }
+
+                LoggerService.Log("-------- FIN DE L'AUTHENTIFICATION --------");
+            }
+            else if (api.AuthType == AuthenticationType.Basic)
+            {
+                LoggerService.Log("Authentification Basic");
+
+                if (api.AuthParameters.TryGetValue("Username", out string username) &&
+                    api.AuthParameters.TryGetValue("Password", out string password))
+                {
+                    var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+                    LoggerService.Log("En-tête d'authentification Basic ajouté");
+                }
+                else
+                {
+                    LoggerService.Log("AVERTISSEMENT: Paramètres d'authentification Basic incomplets");
+                }
+
+                LoggerService.Log("-------- FIN DE L'AUTHENTIFICATION --------");
             }
             else
             {
