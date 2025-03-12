@@ -613,43 +613,69 @@ namespace POMsag
             // Récupérer les paramètres d'authentification
             ApiConfig.AuthParameters.Clear();
 
-            switch (ApiConfig.AuthType)
+            // Récupérer le TableLayoutPanel à l'intérieur du authPanel
+            if (authPanel.Controls.Count > 0 && authPanel.Controls[0] is TableLayoutPanel authLayout)
             {
-                case AuthenticationType.ApiKey:
-                    if (authPanel.Controls["HeaderName"] is TextBox headerNameTextBox)
-                        ApiConfig.AuthParameters["HeaderName"] = headerNameTextBox.Text;
+                switch (ApiConfig.AuthType)
+                {
+                    case AuthenticationType.ApiKey:
+                        // Parcourir les contrôles pour trouver les TextBox par leur nom
+                        foreach (Control control in authLayout.Controls)
+                        {
+                            if (control is TextBox textBox)
+                            {
+                                if (textBox.Name == "HeaderName")
+                                    ApiConfig.AuthParameters["HeaderName"] = textBox.Text;
+                                else if (textBox.Name == "Value")
+                                    ApiConfig.AuthParameters["Value"] = textBox.Text;
+                            }
+                        }
+                        break;
 
-                    if (authPanel.Controls["Value"] is TextBox valueTextBox)
-                        ApiConfig.AuthParameters["Value"] = valueTextBox.Text;
-                    break;
+                    case AuthenticationType.OAuth2ClientCredentials:
+                        // Parcourir les contrôles pour trouver les TextBox par leur nom
+                        foreach (Control control in authLayout.Controls)
+                        {
+                            if (control is TextBox textBox)
+                            {
+                                if (textBox.Name == "TokenUrl")
+                                    ApiConfig.AuthParameters["TokenUrl"] = textBox.Text;
+                                else if (textBox.Name == "ClientId")
+                                    ApiConfig.AuthParameters["ClientId"] = textBox.Text;
+                                else if (textBox.Name == "ClientSecret")
+                                    ApiConfig.AuthParameters["ClientSecret"] = textBox.Text;
+                                else if (textBox.Name == "Resource")
+                                    ApiConfig.AuthParameters["Resource"] = textBox.Text;
+                            }
+                        }
+                        break;
 
-                case AuthenticationType.OAuth2ClientCredentials:
-                    if (authPanel.Controls["TokenUrl"] is TextBox tokenUrlTextBox)
-                        ApiConfig.AuthParameters["TokenUrl"] = tokenUrlTextBox.Text;
-
-                    if (authPanel.Controls["ClientId"] is TextBox clientIdTextBox)
-                        ApiConfig.AuthParameters["ClientId"] = clientIdTextBox.Text;
-
-                    if (authPanel.Controls["ClientSecret"] is TextBox clientSecretTextBox)
-                        ApiConfig.AuthParameters["ClientSecret"] = clientSecretTextBox.Text;
-
-                    if (authPanel.Controls["Resource"] is TextBox resourceTextBox)
-                        ApiConfig.AuthParameters["Resource"] = resourceTextBox.Text;
-                    break;
-
-                case AuthenticationType.Basic:
-                    if (authPanel.Controls["Username"] is TextBox usernameTextBox)
-                        ApiConfig.AuthParameters["Username"] = usernameTextBox.Text;
-
-                    if (authPanel.Controls["Password"] is TextBox passwordTextBox)
-                        ApiConfig.AuthParameters["Password"] = passwordTextBox.Text;
-                    break;
+                    case AuthenticationType.Basic:
+                        // Parcourir les contrôles pour trouver les TextBox par leur nom
+                        foreach (Control control in authLayout.Controls)
+                        {
+                            if (control is TextBox textBox)
+                            {
+                                if (textBox.Name == "Username")
+                                    ApiConfig.AuthParameters["Username"] = textBox.Text;
+                                else if (textBox.Name == "Password")
+                                    ApiConfig.AuthParameters["Password"] = textBox.Text;
+                            }
+                        }
+                        break;
+                }
             }
 
             // Ajouter des journalisations pour le débogage
             LoggerService.Log($"API sauvegardée: ID={ApiConfig.ApiId}, Nom={ApiConfig.Name}, URL={ApiConfig.BaseUrl}");
             LoggerService.Log($"Type d'authentification: {ApiConfig.AuthType}");
             LoggerService.Log($"Nombre de paramètres d'authentification: {ApiConfig.AuthParameters.Count}");
+
+            // Afficher les paramètres pour le débogage
+            foreach (var param in ApiConfig.AuthParameters)
+            {
+                LoggerService.Log($"Paramètre: {param.Key} = {param.Value}");
+            }
 
             // Définir le DialogResult à OK pour fermer le formulaire
             this.DialogResult = DialogResult.OK;

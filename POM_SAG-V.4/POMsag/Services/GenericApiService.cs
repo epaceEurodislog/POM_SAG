@@ -414,5 +414,156 @@ namespace POMsag.Services
                 throw;
             }
         }
+
+        private async Task<List<Dictionary<string, object>>> FetchDataFromDynamicsAsync(
+    ApiConfiguration api,
+    ApiEndpoint endpoint,
+    DateTime? startDate,
+    DateTime? endDate)
+        {
+            LoggerService.Log("-------- TRAITEMENT SPÉCIAL DYNAMICS 365 --------");
+
+            try
+            {
+                // Configuration du client HTTP avec gestion des certificats
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                };
+
+                using var client = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(api.BaseUrl)
+                };
+
+                // Authentification
+                await HandleAuthenticationAsync(api, client);
+
+                // Construction de l'URL avec la syntaxe correcte pour Dynamics OData
+                string baseUrl = endpoint.Path;
+
+                // Construction de l'URL de base avec cross-company
+                string url = $"{baseUrl}?cross-company=true";
+
+                // Construire les filtres de date selon le format Dynamics
+                if (startDate.HasValue && endDate.HasValue)
+                {
+                    string dateFilter = $"$filter=PurchasePriceDate ge {startDate.Value:yyyy-MM-dd}T00:00:00Z and " +
+                                        $"PurchasePriceDate le {endDate.Value:yyyy-MM-dd}T23:59:59Z";
+
+                    url += $"&{dateFilter}";
+                    LoggerService.Log($"Filtre de date ajouté: {dateFilter}");
+                }
+
+                // Ajouter la limite d'enregistrements
+                int maxRecords = _configuration.MaxRecords > 0 ? _configuration.MaxRecords : 500;
+                url += $"&$top={maxRecords}";
+
+                LoggerService.Log($"URL Dynamics OData complète: {url}");
+
+                // Préparation des en-têtes
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                // Journalisation des en-têtes
+                LoggerService.Log("En-têtes de la requête :");
+                foreach (var header in client.DefaultRequestHeaders)
+                {
+                    LoggerService.Log($"{header.Key}: {string.Join(", ", header.Value)}");
+                }
+
+                // Exécution de la requête
+                HttpResponseMessage response;
+                try
+                {
+                    response = await client.GetAsync(url);
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"ERREUR lors de l'appel API Dynamics : {ex.Message}");
+                    LoggerService.LogException(ex, "Erreur d'appel API Dynamics");
+                    throw new Exception($"Erreur lors de l'appel à l'API Dynamics : {ex.Message}", ex);
+                }
+
+                // Lecture du contenu
+                var content = await response.Content.ReadAsStringAsync();
+
+                // Journalisation détaillée de la réponse
+                LoggerService.Log($"Statut de la réponse : {response.StatusCode}");
+                LoggerService.Log($"Type de contenu : {response.Content.Headers.ContentType}");
+                LoggerService.Log($"Longueur du contenu : {content.Length} caractères");
+                LoggerService.Log($"Début du contenu (500 premiers caractères) :\n{content.Substring(0, Math.Min(500, content.Length))}");
+
+                // Vérification du succès de la requête
+                if (!response.IsSuccessStatusCode)
+                {
+                    LoggerService.Log($"ERREUR de l'API Dynamics: {response.StatusCode} - {content}");
+                    throw new Exception($"Erreur de l'API Dynamics: {response.StatusCode} - {content}");
+                }
+
+                // Options de désérialisation flexibles
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = JsonCommentHandling.Skip
+                };
+
+                // Désérialisation spécifique à Dynamics
+                try
+                {
+                    using (var doc = JsonDocument.Parse(content))
+                    {
+                        if (doc.RootElement.TryGetProperty("value", out JsonElement valueElement))
+                        {
+                            var valueJson = valueElement.GetRawText();
+                            LoggerService.Log($"Contenu de 'value' trouvé, longueur: {valueJson.Length}");
+
+                            var items = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(
+                                valueJson,
+                                options
+                            ) ?? new List<Dictionary<string, object>>();
+
+                            LoggerService.Log($"Désérialisation réussie: {items.Count} éléments récupérés");
+
+                            // Ajouter des logs pour examiner les données
+                            if (items.Count > 0)
+                            {
+                                // Échantillon du premier élément pour débogage
+                                var firstItem = items[0];
+                                LoggerService.Log("Premier élément récupéré (échantillon) :");
+                                foreach (var kvp in firstItem.Take(5)) // Limiter à 5 champs pour éviter des logs trop volumineux
+                                {
+                                    LoggerService.Log($"  - {kvp.Key}: {kvp.Value}");
+                                }
+                            }
+                            else
+                            {
+                                LoggerService.Log("ATTENTION : Aucun élément récupéré de l'API !");
+                            }
+
+                            LoggerService.Log("-------- FIN DU TRAITEMENT DYNAMICS 365 --------");
+                            return items;
+                        }
+                        else
+                        {
+                            LoggerService.Log("ERREUR : Propriété 'value' non trouvée dans la réponse JSON Dynamics");
+                            throw new Exception("Format de réponse Dynamics invalide: propriété 'value' non trouvée");
+                        }
+                    }
+                }
+                catch (JsonException ex)
+                {
+                    LoggerService.LogException(ex, "Erreur lors de la désérialisation JSON Dynamics");
+                    LoggerService.Log($"Contenu problématique :\n{content}");
+                    throw new Exception($"Erreur de désérialisation JSON Dynamics: {ex.Message}", ex);
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "Erreur globale lors du traitement Dynamics");
+                throw;
+            }
+        }
     }
 }

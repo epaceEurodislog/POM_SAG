@@ -15,31 +15,103 @@ namespace POMsag
     {
         private const string CONFIG_FILE = "config.ini";
 
-        public string ApiUrl { get; private set; }
-        public string ApiKey { get; private set; }
+        // Base de données
         public string DatabaseConnectionString { get; private set; }
 
-        // Paramètres pour D365
-        public string TokenUrl { get; private set; }
-        public string ClientId { get; private set; }
-        public string ClientSecret { get; private set; }
-        public string Resource { get; private set; }
-        public string DynamicsApiUrl { get; private set; }
+        // Paramètres généraux pour l'application
         public int MaxRecords { get; private set; }
 
-        // Paramètre pour numéro d'article spécifique
-        public string SpecificItemNumber { get; private set; }
+        // Liste des API configurées
+        public List<ApiConfiguration> ConfiguredApis { get; private set; } = new List<ApiConfiguration>();
 
         // Préférences de sélection des champs
         public Dictionary<string, FieldSelectionPreference> FieldSelections { get; private set; } = new Dictionary<string, FieldSelectionPreference>();
 
-        // Liste des API configurées
-        public List<ApiConfiguration> ConfiguredApis { get; private set; } = new List<ApiConfiguration>();
+        // Propriétés dérivées pour la compatibilité avec le code existant
+        public string ApiUrl => GetLegacyApiUrl();
+        public string ApiKey => GetLegacyApiKey();
+        public string TokenUrl => GetDynamicsTokenUrl();
+        public string ClientId => GetDynamicsClientId();
+        public string ClientSecret => GetDynamicsClientSecret();
+        public string Resource => GetDynamicsResource();
+        public string DynamicsApiUrl => GetDynamicsApiUrl();
+        public string SpecificItemNumber { get; private set; }
 
         public AppConfiguration()
         {
             LoadConfiguration();
         }
+
+        #region Propriétés dérivées pour la compatibilité
+
+        private string GetLegacyApiUrl()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "pom");
+            return api?.BaseUrl ?? "http://localhost:5001/";
+        }
+
+        private string GetLegacyApiKey()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "pom");
+            if (api != null && api.AuthType == AuthenticationType.ApiKey)
+            {
+                api.AuthParameters.TryGetValue("Value", out string apiKey);
+                return apiKey ?? "";
+            }
+            return "";
+        }
+
+        private string GetDynamicsTokenUrl()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+            if (api != null && api.AuthType == AuthenticationType.OAuth2ClientCredentials)
+            {
+                api.AuthParameters.TryGetValue("TokenUrl", out string tokenUrl);
+                return tokenUrl ?? "https://login.microsoftonline.com/6d38d227-4a4d-4fd8-8000-7e5e4f015d7d/oauth2/token";
+            }
+            return "https://login.microsoftonline.com/6d38d227-4a4d-4fd8-8000-7e5e4f015d7d/oauth2/token";
+        }
+
+        private string GetDynamicsClientId()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+            if (api != null && api.AuthType == AuthenticationType.OAuth2ClientCredentials)
+            {
+                api.AuthParameters.TryGetValue("ClientId", out string clientId);
+                return clientId ?? "";
+            }
+            return "";
+        }
+
+        private string GetDynamicsClientSecret()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+            if (api != null && api.AuthType == AuthenticationType.OAuth2ClientCredentials)
+            {
+                api.AuthParameters.TryGetValue("ClientSecret", out string clientSecret);
+                return clientSecret ?? "";
+            }
+            return "";
+        }
+
+        private string GetDynamicsResource()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+            if (api != null && api.AuthType == AuthenticationType.OAuth2ClientCredentials)
+            {
+                api.AuthParameters.TryGetValue("Resource", out string resource);
+                return resource ?? "https://br-uat.sandbox.operations.eu.dynamics.com/";
+            }
+            return "https://br-uat.sandbox.operations.eu.dynamics.com/";
+        }
+
+        private string GetDynamicsApiUrl()
+        {
+            var api = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+            return api?.BaseUrl ?? "https://br-uat.sandbox.operations.eu.dynamics.com/data";
+        }
+
+        #endregion
 
         private void LoadConfiguration()
         {
@@ -53,25 +125,16 @@ namespace POMsag
                 var parser = new FileIniDataParser();
                 IniData configData = parser.ReadFile(CONFIG_FILE);
 
-                ApiUrl = configData["Settings"]["ApiUrl"];
-                ApiKey = configData["Settings"]["ApiKey"];
+                // Paramètres de base de données
                 DatabaseConnectionString = configData["Settings"]["DatabaseConnectionString"];
 
-                // Charger les paramètres D365
-                TokenUrl = configData["D365"]["TokenUrl"];
-                ClientId = configData["D365"]["ClientId"];
-                ClientSecret = configData["D365"]["ClientSecret"];
-                Resource = configData["D365"]["Resource"];
-                DynamicsApiUrl = configData["D365"]["DynamicsApiUrl"];
-
-                // Charger le nombre maximal d'enregistrements
-                if (int.TryParse(configData["D365"]["MaxRecords"], out int maxRecords))
+                // Paramètres généraux
+                if (int.TryParse(configData["Settings"]["MaxRecords"], out int maxRecords))
                     MaxRecords = maxRecords;
                 else
-                    MaxRecords = 500; // Valeur par défaut
+                    MaxRecords = 500;
 
-                // Charger le numéro d'article spécifique
-                SpecificItemNumber = configData["D365"]["SpecificItemNumber"] ?? "";
+                SpecificItemNumber = configData["Settings"]["SpecificItemNumber"] ?? "";
 
                 // Charger les préférences de sélection des champs
                 LoadFieldSelections(configData);
@@ -82,18 +145,12 @@ namespace POMsag
             catch (Exception ex)
             {
                 // Valeurs par défaut
-                ApiUrl = "http://localhost:5001/";
-                ApiKey = "";
-                DatabaseConnectionString = "";
-
-                // Valeurs par défaut pour D365
-                TokenUrl = "https://login.microsoftonline.com/6d38d227-4a4d-4fd8-8000-7e5e4f015d7d/oauth2/token";
-                ClientId = "";
-                ClientSecret = "";
-                Resource = "https://br-uat.sandbox.operations.eu.dynamics.com/";
-                DynamicsApiUrl = "https://br-uat.sandbox.operations.eu.dynamics.com/data";
+                DatabaseConnectionString = "Server=192.168.9.13\\SQLEXPRESS;Database=pom;User Id=eurodislog;Password=euro;TrustServerCertificate=True;Encrypt=False";
                 MaxRecords = 500;
-                SpecificItemNumber = ""; // Valeur par défaut pour le numéro d'article
+                SpecificItemNumber = "";
+
+                // Créer les API par défaut
+                CreateDefaultApis();
 
                 MessageBox.Show(
                     $"Erreur de lecture de la configuration : {ex.Message}\n" +
@@ -166,19 +223,10 @@ namespace POMsag
             var parser = new FileIniDataParser();
             IniData configData = new IniData();
 
-            // Section Settings existante
-            configData["Settings"]["ApiUrl"] = "http://localhost:5001/";
-            configData["Settings"]["ApiKey"] = "";
+            // Section Settings
             configData["Settings"]["DatabaseConnectionString"] = "Server=192.168.9.13\\SQLEXPRESS;Database=pom;User Id=eurodislog;Password=euro;TrustServerCertificate=True;Encrypt=False";
-
-            // Section D365
-            configData["D365"]["TokenUrl"] = "https://login.microsoftonline.com/6d38d227-4a4d-4fd8-8000-7e5e4f015d7d/oauth2/token";
-            configData["D365"]["ClientId"] = "";
-            configData["D365"]["ClientSecret"] = "";
-            configData["D365"]["Resource"] = "https://br-uat.sandbox.operations.eu.dynamics.com/";
-            configData["D365"]["DynamicsApiUrl"] = "https://br-uat.sandbox.operations.eu.dynamics.com/data";
-            configData["D365"]["MaxRecords"] = "500";
-            configData["D365"]["SpecificItemNumber"] = ""; // Nouveau champ
+            configData["Settings"]["MaxRecords"] = "500";
+            configData["Settings"]["SpecificItemNumber"] = "";
 
             // Section FieldSelections
             configData["FieldSelections"]["Preferences"] = "{}";
@@ -189,29 +237,70 @@ namespace POMsag
             parser.WriteFile(CONFIG_FILE, configData);
         }
 
-        // Dans AppConfiguration.cs, modifiez la méthode CreateDefaultApis()
         private void CreateDefaultApis()
         {
             ConfiguredApis = new List<ApiConfiguration>();
 
-            // Création de l'API Dynamics 365 par défaut (UNIQUEMENT)
-            var d365Api = new ApiConfiguration("dynamics", "Dynamics 365", DynamicsApiUrl)
+            // Création de l'API POM par défaut
+            var pomApi = new ApiConfiguration("pom", "API POM", "http://localhost:5001/")
+            {
+                AuthType = AuthenticationType.ApiKey,
+                AuthParameters = new Dictionary<string, string> {
+                    { "HeaderName", "X-Api-Key" },
+                    { "Value", "" }
+                }
+            };
+
+            // Ajout des endpoints POM
+            pomApi.Endpoints.Add(new ApiEndpoint("clients", "api/clients")
+            {
+                SupportsDateFiltering = true,
+                DateStartParamName = "startDate",
+                DateEndParamName = "endDate",
+                DateFormat = "yyyyMMdd"
+            });
+
+            pomApi.Endpoints.Add(new ApiEndpoint("commandes", "api/commandes")
+            {
+                SupportsDateFiltering = true,
+                DateStartParamName = "startDate",
+                DateEndParamName = "endDate",
+                DateFormat = "yyyyMMdd"
+            });
+
+            pomApi.Endpoints.Add(new ApiEndpoint("produits", "api/produits")
+            {
+                SupportsDateFiltering = false
+            });
+
+            pomApi.Endpoints.Add(new ApiEndpoint("lignescommandes", "api/lignescommandes")
+            {
+                SupportsDateFiltering = true,
+                DateStartParamName = "startDate",
+                DateEndParamName = "endDate",
+                DateFormat = "yyyyMMdd"
+            });
+
+            ConfiguredApis.Add(pomApi);
+
+            // Création de l'API Dynamics 365 par défaut
+            var d365Api = new ApiConfiguration("dynamics", "Dynamics 365", "https://br-uat.sandbox.operations.eu.dynamics.com/data")
             {
                 AuthType = AuthenticationType.OAuth2ClientCredentials,
                 AuthParameters = new Dictionary<string, string> {
-            { "TokenUrl", TokenUrl },
-            { "ClientId", ClientId },
-            { "ClientSecret", ClientSecret },
-            { "Resource", Resource }
-        }
+                    { "TokenUrl", "https://login.microsoftonline.com/6d38d227-4a4d-4fd8-8000-7e5e4f015d7d/oauth2/token" },
+                    { "ClientId", "" },
+                    { "ClientSecret", "" },
+                    { "Resource", "https://br-uat.sandbox.operations.eu.dynamics.com/" }
+                }
             };
 
             // Ajout des endpoints Dynamics
             d365Api.Endpoints.Add(new ApiEndpoint("ReleasedProductsV2", "ReleasedProductsV2")
             {
                 SupportsDateFiltering = true,
-                DateStartParamName = "PurchasePriceDate ge",
-                DateEndParamName = "PurchasePriceDate le",
+                DateStartParamName = "", // Format spécial pour Dynamics
+                DateEndParamName = "",   // Format spécial pour Dynamics
                 DateFormat = "yyyy-MM-ddTHH:mm:ssZ"
             });
 
@@ -222,33 +311,17 @@ namespace POMsag
         }
 
         public void SaveConfiguration(
-            string apiUrl,
-            string apiKey,
             string connectionString,
-            string tokenUrl,
-            string clientId,
-            string clientSecret,
-            string resource,
-            string dynamicsApiUrl,
             int maxRecords,
             string specificItemNumber)
         {
             var parser = new FileIniDataParser();
             IniData configData = parser.ReadFile(CONFIG_FILE);
 
-            // Section Settings existante
-            configData["Settings"]["ApiUrl"] = apiUrl;
-            configData["Settings"]["ApiKey"] = apiKey;
+            // Section Settings
             configData["Settings"]["DatabaseConnectionString"] = connectionString;
-
-            // Section D365
-            configData["D365"]["TokenUrl"] = tokenUrl;
-            configData["D365"]["ClientId"] = clientId;
-            configData["D365"]["ClientSecret"] = clientSecret;
-            configData["D365"]["Resource"] = resource;
-            configData["D365"]["DynamicsApiUrl"] = dynamicsApiUrl;
-            configData["D365"]["MaxRecords"] = maxRecords.ToString();
-            configData["D365"]["SpecificItemNumber"] = specificItemNumber;
+            configData["Settings"]["MaxRecords"] = maxRecords.ToString();
+            configData["Settings"]["SpecificItemNumber"] = specificItemNumber;
 
             // Section FieldSelections (préserver les préférences existantes)
             string fieldSelectionsJson = JsonSerializer.Serialize(FieldSelections);
@@ -261,16 +334,107 @@ namespace POMsag
             parser.WriteFile(CONFIG_FILE, configData);
 
             // Mettre à jour les propriétés de l'instance
-            ApiUrl = apiUrl;
-            ApiKey = apiKey;
             DatabaseConnectionString = connectionString;
-            TokenUrl = tokenUrl;
-            ClientId = clientId;
-            ClientSecret = clientSecret;
-            Resource = resource;
-            DynamicsApiUrl = dynamicsApiUrl;
             MaxRecords = maxRecords;
             SpecificItemNumber = specificItemNumber;
+        }
+
+        public void UpdateDynamicsConfig(
+            string tokenUrl,
+            string clientId,
+            string clientSecret,
+            string resource,
+            string dynamicsApiUrl)
+        {
+            var dynamicsApi = ConfiguredApis.FirstOrDefault(a => a.ApiId == "dynamics");
+
+            if (dynamicsApi != null)
+            {
+                // Mettre à jour l'URL de base
+                dynamicsApi.BaseUrl = dynamicsApiUrl;
+
+                // Mettre à jour les paramètres d'authentification
+                if (dynamicsApi.AuthParameters == null)
+                    dynamicsApi.AuthParameters = new Dictionary<string, string>();
+
+                dynamicsApi.AuthParameters["TokenUrl"] = tokenUrl;
+                dynamicsApi.AuthParameters["ClientId"] = clientId;
+                dynamicsApi.AuthParameters["ClientSecret"] = clientSecret;
+                dynamicsApi.AuthParameters["Resource"] = resource;
+            }
+            else
+            {
+                // Créer une nouvelle API Dynamics si elle n'existe pas
+                var newDynamicsApi = new ApiConfiguration("dynamics", "Dynamics 365", dynamicsApiUrl)
+                {
+                    AuthType = AuthenticationType.OAuth2ClientCredentials,
+                    AuthParameters = new Dictionary<string, string> {
+                        { "TokenUrl", tokenUrl },
+                        { "ClientId", clientId },
+                        { "ClientSecret", clientSecret },
+                        { "Resource", resource }
+                    }
+                };
+
+                // Ajouter l'endpoint par défaut
+                newDynamicsApi.Endpoints.Add(new ApiEndpoint("ReleasedProductsV2", "ReleasedProductsV2")
+                {
+                    SupportsDateFiltering = true,
+                    DateStartParamName = "",
+                    DateEndParamName = "",
+                    DateFormat = "yyyy-MM-ddTHH:mm:ssZ"
+                });
+
+                ConfiguredApis.Add(newDynamicsApi);
+            }
+
+            // Sauvegarder la configuration
+            SaveApiConfigurations();
+        }
+
+        public void UpdatePomConfig(
+            string apiUrl,
+            string apiKey)
+        {
+            var pomApi = ConfiguredApis.FirstOrDefault(a => a.ApiId == "pom");
+
+            if (pomApi != null)
+            {
+                // Mettre à jour l'URL de base
+                pomApi.BaseUrl = apiUrl;
+
+                // Mettre à jour la clé API
+                if (pomApi.AuthParameters == null)
+                    pomApi.AuthParameters = new Dictionary<string, string>();
+
+                pomApi.AuthParameters["Value"] = apiKey;
+            }
+            else
+            {
+                // Créer une nouvelle API POM si elle n'existe pas
+                var newPomApi = new ApiConfiguration("pom", "API POM", apiUrl)
+                {
+                    AuthType = AuthenticationType.ApiKey,
+                    AuthParameters = new Dictionary<string, string> {
+                        { "HeaderName", "X-Api-Key" },
+                        { "Value", apiKey }
+                    }
+                };
+
+                // Ajouter les endpoints par défaut
+                newPomApi.Endpoints.Add(new ApiEndpoint("clients", "api/clients")
+                {
+                    SupportsDateFiltering = true,
+                    DateStartParamName = "startDate",
+                    DateEndParamName = "endDate",
+                    DateFormat = "yyyyMMdd"
+                });
+
+                ConfiguredApis.Add(newPomApi);
+            }
+
+            // Sauvegarder la configuration
+            SaveApiConfigurations();
         }
 
         public void AddOrUpdateFieldPreference(string entityName, string fieldName, bool isSelected)
@@ -311,6 +475,7 @@ namespace POMsag
                 LoggerService.LogException(ex, "Sauvegarde des préférences de champs");
             }
         }
+
         public void SaveApiConfigurations()
         {
             try
@@ -334,6 +499,7 @@ namespace POMsag
                 throw; // Rethrow to handle it at a higher level
             }
         }
+
         public void AddOrUpdateApi(ApiConfiguration api)
         {
             // Créer une nouvelle instance d'API pour éviter le partage de références
@@ -379,7 +545,5 @@ namespace POMsag
         {
             return ConfiguredApis.FirstOrDefault(a => a.ApiId == apiId);
         }
-
-
     }
 }

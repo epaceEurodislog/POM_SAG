@@ -524,6 +524,18 @@ namespace POMsag
                     throw;
                 }
 
+                // Vérification des données brutes
+                LoggerService.Log($"Données brutes récupérées : {data.Count} enregistrements");
+                if (data.Count > 0)
+                {
+                    var keys = string.Join(", ", data[0].Keys.Take(10)); // Afficher les 10 premiers champs
+                    LoggerService.Log($"Champs disponibles : {keys}");
+
+                    // Vérification des contenus non-null
+                    int nonNullCount = data.Count(d => d.Values.Any(v => v != null));
+                    LoggerService.Log($"Enregistrements avec au moins une valeur non-null : {nonNullCount}");
+                }
+
                 ShowStatus($"Récupération terminée. {data.Count} enregistrements trouvés.");
 
                 // Filtrer les champs selon les préférences
@@ -534,6 +546,10 @@ namespace POMsag
                     var filteredItem = FilterFieldsBasedOnPreferences(item, $"{apiId}_{endpointName}");
                     filteredData.Add(filteredItem);
                 }
+
+                // Vérification après filtrage
+                LoggerService.Log($"Après filtrage : {filteredData.Count} enregistrements, " +
+                                 $"Premier élément contient {(filteredData.Count > 0 ? filteredData[0].Count : 0)} champs");
 
                 // Sauvegarder les données
                 ShowStatus("Enregistrement des données dans la base de destination...");
@@ -564,18 +580,39 @@ namespace POMsag
         {
             // Si aucune préférence n'est définie, renvoyer l'original
             if (!_configuration.FieldSelections.ContainsKey(entityName))
+            {
+                LoggerService.Log($"Aucune préférence de champ pour {entityName}, utilisation de tous les champs");
                 return original;
+            }
 
             var preferences = _configuration.FieldSelections[entityName];
             var filtered = new Dictionary<string, object>();
+            int includedFields = 0;
+            int excludedFields = 0;
 
             foreach (var key in original.Keys)
             {
                 // Si la préférence existe et est activée, ou si elle n'existe pas du tout (par défaut inclure)
-                if (!preferences.Fields.ContainsKey(key) || preferences.Fields[key])
+                bool shouldInclude = !preferences.Fields.ContainsKey(key) || preferences.Fields[key];
+
+                if (shouldInclude)
                 {
                     filtered[key] = original[key];
+                    includedFields++;
                 }
+                else
+                {
+                    excludedFields++;
+                }
+            }
+
+            LoggerService.Log($"Filtrage : {includedFields} champs conservés, {excludedFields} champs exclus");
+
+            if (includedFields == 0)
+            {
+                LoggerService.Log("ATTENTION : Tous les champs ont été filtrés ! Utilisation des données originales");
+                // Retourner l'original si tous les champs sont exclus
+                return original;
             }
 
             return filtered;
@@ -742,8 +779,18 @@ namespace POMsag
         {
             try
             {
+                // Vérification des données avant sérialisation
+                if (data == null || data.Count == 0)
+                {
+                    LoggerService.Log("ERREUR : Pas de données à sauvegarder");
+                    throw new ArgumentException("Pas de données à sauvegarder");
+                }
+
                 using var connection = new SqlConnection(_destinationConnectionString);
                 await connection.OpenAsync();
+
+                // Vérifier la connexion à la base de données
+                LoggerService.Log($"Connexion à la base de données : {connection.State}");
 
                 // Vérifier si la table JSON_DAT existe, sinon la créer
                 var checkTableQuery = @"
@@ -763,8 +810,18 @@ namespace POMsag
                 string formattedDate = DateTime.Now.ToString("yyyyMMdd");
 
                 // Sérialiser toutes les données en un seul document JSON
-                var allDataJson = JsonSerializer.Serialize(data,
-                    new JsonSerializerOptions { WriteIndented = false });
+                var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
+                var allDataJson = JsonSerializer.Serialize(data, jsonOptions);
+
+                // Vérifier la taille du JSON
+                LoggerService.Log($"Taille du JSON à insérer : {allDataJson.Length} caractères");
+
+                // Vérification rapide du contenu JSON
+                if (allDataJson.Length <= 2) // "{}" ou "[]"
+                {
+                    LoggerService.Log("ERREUR : JSON sérialisé vide ou invalide");
+                    throw new Exception("JSON sérialisé vide ou invalide");
+                }
 
                 // Insérer toutes les données en un seul enregistrement
                 var query = @"
@@ -778,12 +835,23 @@ namespace POMsag
                 insertCommand.Parameters.AddWithValue("@CreatedAt", formattedDate);
                 insertCommand.Parameters.AddWithValue("@SourceTable", tableName);
 
+                // Définir la taille du paramètre pour les grands volumes de données
+                insertCommand.Parameters["@JsonContent"].SqlDbType = System.Data.SqlDbType.NVarChar;
+                insertCommand.Parameters["@JsonContent"].Size = -1; // -1 = max
+
                 var jsonKeyu = Convert.ToInt32(await insertCommand.ExecuteScalarAsync());
                 LoggerService.Log($"Données insérées avec JSON_KEYU: {jsonKeyu}, {data.Count} éléments");
+
+                // Vérification après insertion
+                var verifyQuery = "SELECT LEN(JsonContent) FROM JSON_DAT WHERE JSON_KEYU = @Id";
+                using var verifyCommand = new SqlCommand(verifyQuery, connection);
+                verifyCommand.Parameters.AddWithValue("@Id", jsonKeyu);
+                var jsonLength = await verifyCommand.ExecuteScalarAsync();
+                LoggerService.Log($"Vérification : longueur du JSON enregistré = {jsonLength}");
             }
             catch (Exception ex)
             {
-                ShowErrorMessage($"Erreur lors de la sauvegarde en base de données : {ex.Message}");
+                LoggerService.LogException(ex, "Sauvegarde en base de données");
                 throw;
             }
         }
