@@ -1137,3 +1137,7 @@ namespace POMsag
                    $"User Id={textBoxUser.Text};Password={textBoxPassword.Text};" +
                    "TrustServerCertificate=True;Encrypt=False";
         }
+
+    }
+
+}

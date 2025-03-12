@@ -390,44 +390,15 @@ namespace POMsag
 
         private void ConfigButton_Click(object sender, EventArgs e)
         {
-            // Créer un menu contextuel
-            var contextMenu = new ContextMenuStrip();
-
-            var configItem = new ToolStripMenuItem("Configuration générale");
-            configItem.Click += (s, ev) =>
+            // Remplacer l'ancien code avec menu contextuel par:
+            using (var configForm = new ConfigurationForm(_configuration))
             {
-                using (var configForm = new ConfigurationForm(_configuration))
-                {
-                    configForm.ShowDialog();
+                configForm.ShowDialog();
 
-                    // Mettre à jour la configuration
-                    InitializeHttpClient();
-
-                    // Rafraichir les combobox
-                    InitializeControls();
-                }
-            };
-
-            var apiManagerItem = new ToolStripMenuItem("Gestionnaire d'API");
-            apiManagerItem.Click += (s, ev) =>
-            {
-                using (var apiManagerForm = new ApiManagerForm(_configuration))
-                {
-                    apiManagerForm.ShowDialog();
-                    RefreshAfterApiManagerClosed();
-                }
-            };
-
-            contextMenu.Items.Add(configItem);
-            contextMenu.Items.Add(apiManagerItem);
-
-            // Afficher le menu contextuel près du bouton de configuration
-            var menuLocation = this.PointToClient(
-                this.mainMenu.PointToScreen(
-                    new Point(configMenuItem.Bounds.Left, configMenuItem.Bounds.Bottom)
-                )
-            );
-            contextMenu.Show(this, menuLocation);
+                // Mettre à jour la configuration après fermeture du formulaire
+                InitializeHttpClient();
+                InitializeControls();
+            }
         }
 
         private void RefreshAfterApiManagerClosed()

@@ -87,5 +87,36 @@ appsettings.Production.json
 .DS_Store
 Thumbs.db
 
-# Exclure pom_api_log.txt pour éviter de pousser des secrets
+# Exclure les fichiers logs sensibles
+*.log
+*.log.*
+
+# Exclure les fichiers de configuration contenant potentiellement des secrets
+*.env
+.env.*
+*.secret
+secrets.json
+config.json
+credentials.json
+
+# Exclure les fichiers API et tokens
+*.pem
+*.key
+*.crt
+*.pfx
+*.cer
+*.der
+*.cert
+*.csr
+*.ovpn
+*.enc
+*.p12
+
+# Exclure les fichiers avec identifiants ou accès
+id_rsa
+id_rsa.pub
+known_hosts
+
+# Exclusion du dossier delete_fonctionnality
+delete_fonctionnality/
 pom_api_log.txt
