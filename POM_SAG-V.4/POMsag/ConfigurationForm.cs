@@ -319,10 +319,8 @@ namespace POMsag
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Vertical,
-                BorderStyle = BorderStyle.None,
-                Panel1MinSize = 300,
-                Panel2MinSize = 300,
-                SplitterDistance = 450
+                BorderStyle = BorderStyle.None
+                // Ne pas définir Panel1MinSize, Panel2MinSize ou SplitterDistance ici
             };
 
             // Panel gauche (sélection et détails API)
@@ -562,6 +560,49 @@ namespace POMsag
             // Assigner les panneaux aux panels du SplitContainer
             splitContainer.Panel1.Controls.Add(apiTableLayout);
             splitContainer.Panel2.Controls.Add(endpointTableLayout);
+
+            // Ajouter un gestionnaire d'événement Load pour définir la SplitterDistance en toute sécurité
+            this.Load += (s, e) =>
+            {
+                try
+                {
+                    // Définir les tailles minimales et la position du séparateur une fois le formulaire chargé
+                    splitContainer.Panel1MinSize = 100;
+                    splitContainer.Panel2MinSize = 100;
+
+                    // Attendre un court instant pour s'assurer que le formulaire est complètement rendu
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            // Calculer une valeur sécuritaire pour SplitterDistance
+                            int totalWidth = splitContainer.Width;
+                            if (totalWidth <= 0) return; // Éviter les erreurs si la largeur n'est pas encore définie
+
+                            int safeDistance = totalWidth / 2; // 50% de la largeur
+
+                            // S'assurer que la valeur respecte les contraintes
+                            if (safeDistance < splitContainer.Panel1MinSize)
+                                safeDistance = splitContainer.Panel1MinSize;
+
+                            if (safeDistance > totalWidth - splitContainer.Panel2MinSize - splitContainer.SplitterWidth)
+                                safeDistance = totalWidth - splitContainer.Panel2MinSize - splitContainer.SplitterWidth;
+
+                            if (totalWidth > 0 && safeDistance > 0)
+                                splitContainer.SplitterDistance = safeDistance;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Ignorer l'erreur ou la journaliser
+                            LoggerService.Log($"Erreur lors de la définition de SplitterDistance: {ex.Message}");
+                        }
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    LoggerService.Log($"Erreur lors de l'initialisation du SplitContainer: {ex.Message}");
+                }
+            };
 
             return splitContainer;
         }
