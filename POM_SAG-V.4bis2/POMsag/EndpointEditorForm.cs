@@ -6,6 +6,7 @@ using POMsag.Models;
 // Définir des alias pour éviter l'ambiguïté
 using NetHttpMethod = System.Net.Http.HttpMethod;
 using ModelHttpMethod = POMsag.Models.HttpMethod;
+#pragma warning disable CS8618, CS8625, CS8600, CS8602, CS8603, CS8604, CS8601
 
 namespace POMsag
 {
@@ -25,7 +26,6 @@ namespace POMsag
         }
 
 
-        [System.Text.Json.Serialization.JsonIgnore]
         public ApiEndpoint Endpoint { get; private set; }
         private bool _isNewEndpoint;
 

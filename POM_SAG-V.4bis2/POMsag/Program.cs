@@ -1,5 +1,6 @@
 using POMsag.Models;
 using POMsag.Services;
+#pragma warning disable CS8618, CS8625, CS8600, CS8602, CS8603, CS8604, CS8601
 
 namespace POMsag;
 
