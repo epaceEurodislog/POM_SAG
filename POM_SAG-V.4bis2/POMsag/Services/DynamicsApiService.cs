@@ -10,7 +10,7 @@ using POMsag.Models;
 
 namespace POMsag.Services
 {
-    public class DynamicApiService
+    public class DynamicsApiService : IDynamicsApiService
     {
         private readonly ApiManager _apiManager;
         private readonly Dictionary<string, HttpClient> _httpClients = new Dictionary<string, HttpClient>();
@@ -226,7 +226,7 @@ namespace POMsag.Services
             }
         }
 
-        private async Task GetOAuthTokenAsync(ApiDefinition api)
+        private async Task<string> GetOAuthTokenAsync(ApiDefinition api)
         {
             try
             {
@@ -240,11 +240,11 @@ namespace POMsag.Services
 
                 var requestContent = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", clientId),
-                    new KeyValuePair<string, string>("client_secret", clientSecret),
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("resource", resource)
-                });
+            new KeyValuePair<string, string>("client_id", clientId),
+            new KeyValuePair<string, string>("client_secret", clientSecret),
+            new KeyValuePair<string, string>("grant_type", "client_credentials"),
+            new KeyValuePair<string, string>("resource", resource)
+        });
 
                 using var client = new HttpClient();
                 var response = await client.PostAsync(tokenUrl, requestContent);
@@ -277,6 +277,8 @@ namespace POMsag.Services
                 _tokenExpiryTimes[api.Name] = DateTime.Now.AddSeconds(expiresIn - 60); // Marge de sécurité
 
                 LoggerService.Log($"Token OAuth obtenu pour {api.Name}, valide jusqu'à {_tokenExpiryTimes[api.Name]}");
+
+                return accessToken;
             }
             catch (Exception ex)
             {

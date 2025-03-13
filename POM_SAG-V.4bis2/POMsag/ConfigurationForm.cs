@@ -39,7 +39,7 @@ public partial class ConfigurationForm : Form
 
     // Pour initialiser un nouveau HttpClient si nécessaire
     private HttpClient _httpClient;
-    private DynamicsApiService _dynamicsApiService;
+    private IDynamicsApiService _dynamicsApiService;
 
     public ConfigurationForm(AppConfiguration configuration, SchemaAnalysisService schemaAnalysisService = null)
     {

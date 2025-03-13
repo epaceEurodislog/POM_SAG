@@ -9,7 +9,7 @@ namespace POMsag.Services
 {
     public class SchemaAnalysisService
     {
-        private readonly DynamicsApiService _dynamicsApiService;
+        private IDynamicsApiService _dynamicsApiService;
         private readonly HttpClient _httpClient;
         private readonly AppConfiguration _configuration;
 

@@ -13,7 +13,7 @@ namespace POMsag.Services
     {
         private readonly AppConfiguration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly DynamicsApiService? _dynamicsApiService;
+        private IDynamicsApiService _dynamicsApiService;
 
         public GenericApiService(AppConfiguration configuration, HttpClient? httpClient = null, DynamicsApiService? dynamicsApiService = null)
         {

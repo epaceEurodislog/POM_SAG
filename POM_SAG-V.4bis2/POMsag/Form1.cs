@@ -19,7 +19,7 @@ namespace POMsag
         private HttpClient _httpClient;
         private readonly AppConfiguration _configuration;
         private string _destinationConnectionString;
-        private DynamicsApiService _dynamicsApiService;
+        private IDynamicsApiService _dynamicsApiService;
         private GenericApiService _genericApiService;
         private SchemaAnalysisService _schemaAnalysisService;
         private bool _isTransferInProgress = false;

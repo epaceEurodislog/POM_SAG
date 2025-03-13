@@ -61,10 +61,6 @@ namespace POMsag
                 Text = "Ajoutez, modifiez ou supprimez des configurations d'API. Chaque API peut avoir plusieurs endpoints qui seront disponibles comme sources de données.",
                 Dock = DockStyle.Top,
                 Height = 40,
-                ForeColor = ColorPalette.Secondary
-                Text = "Ajoutez, modifiez ou supprimez des configurations d'API. Chaque API peut avoir plusieurs endpoints qui seront disponibles comme sources de données.",
-                Dock = DockStyle.Top,
-                Height = 40,
                 ForeColor = ColorPalette.SecondaryText,
                 Padding = new Padding(10, 0, 10, 10),
                 TextAlign = ContentAlignment.MiddleLeft
