@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using POMsag.Models;
+// Définir des alias pour éviter l'ambiguïté
 using NetHttpMethod = System.Net.Http.HttpMethod;
 using ModelHttpMethod = POMsag.Models.HttpMethod;
 
@@ -24,6 +25,7 @@ namespace POMsag
         }
 
 
+        [System.Text.Json.Serialization.JsonIgnore]
         public ApiEndpoint Endpoint { get; private set; }
         private bool _isNewEndpoint;
 
@@ -136,7 +138,7 @@ namespace POMsag
                 ForeColor = ColorPalette.PrimaryText
             };
 
-            comboBoxMethod.Items.AddRange(Enum.GetNames(typeof(HttpMethod)));
+            comboBoxMethod.Items.AddRange(Enum.GetNames(typeof(ModelHttpMethod)));
             comboBoxMethod.SelectedIndex = 0;
 
             var labelResponseRootPath = new Label
@@ -398,7 +400,7 @@ namespace POMsag
                 Endpoint.Name = textBoxName.Text;
                 Endpoint.Description = textBoxDescription.Text;
                 Endpoint.Path = textBoxPath.Text;
-                Endpoint.Method = (HttpMethod)Enum.Parse(typeof(HttpMethod), comboBoxMethod.SelectedItem.ToString());
+                Endpoint.Method = (ModelHttpMethod)Enum.Parse(typeof(ModelHttpMethod), comboBoxMethod.SelectedItem?.ToString() ?? "Get");
                 Endpoint.ResponseRootPath = textBoxResponseRootPath.Text;
 
                 // Paramètres

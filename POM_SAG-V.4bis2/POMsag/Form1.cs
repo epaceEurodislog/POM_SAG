@@ -69,15 +69,7 @@ namespace POMsag
             _httpClient.DefaultRequestHeaders.Add("X-Api-Key", _configuration.ApiKey);
             _destinationConnectionString = _configuration.DatabaseConnectionString;
 
-            // Service D365 API avec limite d'enregistrements
-            _dynamicsApiService = new DynamicsApiService(
-                _configuration.TokenUrl,
-                _configuration.ClientId,
-                _configuration.ClientSecret,
-                _configuration.Resource,
-                _configuration.DynamicsApiUrl,
-                _configuration.MaxRecords
-            );
+            _dynamicsApiService = new DynamicsApiService(_apiManager);
         }
 
         private void ApiManagerMenuItem_Click(object sender, EventArgs e)
@@ -391,8 +383,10 @@ namespace POMsag
                     progressBar.Value = 10;
                     UpdateProgressLabel();
 
-                    // Utiliser le service API dynamique
-                    data = await _dynamicApiService.FetchDataAsync(apiName, endpointName, startDate, endDate);
+                    var parts = selectedTable.Split(':');
+                    string apiName = parts[0];
+                    string endpoint = parts[1];
+                    data = await _dynamicsApiService.FetchDataAsync(apiName, endpoint, startDate, endDate);
                 }
                 else
                 {
@@ -406,7 +400,7 @@ namespace POMsag
                     UpdateProgressLabel();
 
                     // Récupérer les données avec le service générique
-                    data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
+                    data = await _genericApiService.FetchDataAsync("dynamics", endpointName, startDate, endDate);
                 }
 
                 // Mise à jour du progrès

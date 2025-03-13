@@ -40,6 +40,7 @@ public partial class ConfigurationForm : Form
     // Pour initialiser un nouveau HttpClient si nécessaire
     private HttpClient _httpClient;
     private IDynamicsApiService _dynamicsApiService;
+    private ApiManager _apiManager;
 
     public ConfigurationForm(AppConfiguration configuration, SchemaAnalysisService schemaAnalysisService = null)
     {
@@ -48,6 +49,9 @@ public partial class ConfigurationForm : Form
 
         // Si un service d'analyse de schéma est fourni, l'utiliser. Sinon, en créer un nouveau lorsque nécessaire.
         _schemaAnalysisService = schemaAnalysisService;
+
+        // Initialiser l'API Manager
+        _apiManager = new ApiManager();
 
         // Décomposer et remplir les champs de connexion
         ParseAndFillConnectionString(_configuration.DatabaseConnectionString);
@@ -614,7 +618,7 @@ public partial class ConfigurationForm : Form
             {
                 Name = "ReleasedProductsV2",
                 Path = "ReleasedProductsV2",
-                Method = HttpMethod.Get,
+                Method = POMsag.Models.HttpMethod.Get,
                 SupportsDateFiltering = true,
                 StartDateParamName = "$filter=PurchasePriceDate ge @startDate",
                 EndDateParamName = "and PurchasePriceDate le @endDate",
@@ -635,9 +639,10 @@ public partial class ConfigurationForm : Form
         // Initialiser le service Dynamics
         _dynamicsApiService = new DynamicsApiService(_apiManager);
 
-        // Initialiser le service d'analyse de schéma
+        var dynamicsService = new DynamicsApiService(_apiManager);
+        _dynamicsApiService = dynamicsService; // Assignez ici pour faire référence au même objet
         _schemaAnalysisService = new SchemaAnalysisService(
-            _dynamicsApiService,
+            dynamicsService,
             _httpClient,
             _configuration
         );

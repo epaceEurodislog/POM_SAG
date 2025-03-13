@@ -330,5 +330,39 @@ namespace POMsag.Services
                     return null;
             }
         }
+
+        public async Task<List<Dictionary<string, object>>> FetchDataAsync(
+            string apiName,
+            string endpointName,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
+        {
+            try
+            {
+                if (endpointName == "ReleasedProductsV2")
+                {
+                    var products = await GetReleasedProductsAsync(startDate, endDate);
+
+                    // Convertir les ReleasedProduct en Dictionary<string, object>
+                    var result = new List<Dictionary<string, object>>();
+                    foreach (var product in products)
+                    {
+                        var dict = product.ToDictionary();
+                        result.Add(dict);
+                    }
+
+                    return result;
+                }
+                else
+                {
+                    throw new NotImplementedException($"L'endpoint '{endpointName}' n'est pas implémenté");
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, $"FetchDataAsync - {endpointName}");
+                throw;
+            }
+        }
     }
 }
