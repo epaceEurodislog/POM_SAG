@@ -120,3 +120,4 @@ known_hosts
 # Exclusion du dossier delete_fonctionnality
 delete_fonctionnality/
 pom_api_log.txt
+APIs/
