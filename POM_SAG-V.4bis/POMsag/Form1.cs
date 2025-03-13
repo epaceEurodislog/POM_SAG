@@ -156,7 +156,7 @@ namespace POMsag
             statusTitlePanel.Controls.Add(closeStatusButton);
 
             // Zone de texte de statut améliorée
-            statusTextBox = new TextBox
+            statusTextBox = new RichTextBox
             {
                 Multiline = true,
                 ReadOnly = true,
@@ -164,7 +164,7 @@ namespace POMsag
                 BackColor = ColorPalette.WhiteBackground,
                 ForeColor = ColorPalette.PrimaryText,
                 Font = new Font("Consolas", 10),
-                ScrollBars = ScrollBars.Vertical
+                ScrollBars = RichTextBoxScrollBars.Vertical,
             };
 
             // Assembler le panneau de statut

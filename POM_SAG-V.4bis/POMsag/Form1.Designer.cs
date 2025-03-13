@@ -225,8 +225,8 @@ namespace POMsag
                 Visible = false
             };
 
-            // Zone de texte de statut
-            statusTextBox = new TextBox
+            // Zone de texte de statut (changé de TextBox à RichTextBox)
+            statusTextBox = new RichTextBox
             {
                 Multiline = true,
                 ReadOnly = true,
@@ -298,7 +298,9 @@ namespace POMsag
         private DateTimePicker dateTimePickerStart;
         private DateTimePicker dateTimePickerEnd;
         private Panel statusPanel;
-        private TextBox statusTextBox;
+        // Modification de TextBox à RichTextBox
+        private RichTextBox statusTextBox;
+
         // Contrôles de menu
         private MenuStrip mainMenu;
         private ToolStripMenuItem fileMenuItem;
