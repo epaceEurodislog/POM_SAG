@@ -595,18 +595,52 @@ public partial class ConfigurationForm : Form
             _httpClient.DefaultRequestHeaders.Add("X-Api-Key", _configuration.ApiKey);
         }
 
-        // Initialiser le service Dynamics API
-        _dynamicsApiService = new DynamicsApiService(
-            _configuration.TokenUrl,
-            _configuration.ClientId,
-            _configuration.ClientSecret,
-            _configuration.Resource,
-            _configuration.DynamicsApiUrl,
-            _configuration.MaxRecords
-        );
+        // Créer la définition de l'API Dynamics 365
+        var dynamicsApi = new ApiDefinition
+        {
+            Name = "Dynamics365",
+            BaseUrl = _configuration.DynamicsApiUrl,
+            AuthType = ApiAuthType.OAuth2,
+            AuthProperties = new Dictionary<string, string>
+        {
+            { "TokenUrl", _configuration.TokenUrl },
+            { "ClientId", _configuration.ClientId },
+            { "ClientSecret", _configuration.ClientSecret },
+            { "Resource", _configuration.Resource }
+        },
+            Endpoints = new List<ApiEndpoint>
+        {
+            new ApiEndpoint
+            {
+                Name = "ReleasedProductsV2",
+                Path = "ReleasedProductsV2",
+                Method = HttpMethod.Get,
+                SupportsDateFiltering = true,
+                StartDateParamName = "$filter=PurchasePriceDate ge @startDate",
+                EndDateParamName = "and PurchasePriceDate le @endDate",
+                DateFormat = "yyyy-MM-ddT00:00:00Z",
+                ResponseRootPath = "value",
+                Parameters = new Dictionary<string, string>
+                {
+                    { "cross-company", "true" },
+                    { "$top", _configuration.MaxRecords.ToString() }
+                }
+            }
+        }
+        };
+
+        // Ajouter ou mettre à jour l'API dans le gestionnaire d'API
+        _apiManager.AddOrUpdateApi(dynamicsApi);
+
+        // Initialiser le service Dynamics
+        _dynamicsApiService = new DynamicsApiService(_apiManager);
 
         // Initialiser le service d'analyse de schéma
-        _schemaAnalysisService = new SchemaAnalysisService(_dynamicsApiService, _httpClient, _configuration);
+        _schemaAnalysisService = new SchemaAnalysisService(
+            _dynamicsApiService,
+            _httpClient,
+            _configuration
+        );
     }
 
     private void ButtonSave_Click(object sender, EventArgs e)

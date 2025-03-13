@@ -19,13 +19,12 @@ namespace POMsag
         private HttpClient _httpClient;
         private readonly AppConfiguration _configuration;
         private string _destinationConnectionString;
-        private IDynamicsApiService _dynamicsApiService;
         private GenericApiService _genericApiService;
         private SchemaAnalysisService _schemaAnalysisService;
         private bool _isTransferInProgress = false;
         private Panel progressPanel;
         private ApiManager _apiManager;
-        private DynamicApiService _dynamicApiService;
+        private DynamicsApiService _dynamicsApiService;
         private ToolStripMenuItem _apiManagerMenuItem;
 
         // Exposer le service d'analyse de schéma pour être réutilisé
@@ -46,8 +45,7 @@ namespace POMsag
 
             // Initialiser le gestionnaire d'API
             _apiManager = new ApiManager();
-            _dynamicApiService = new DynamicApiService(_apiManager);
-
+            _dynamicsApiService = new DynamicsApiService(_apiManager);
             // Initialiser le client HTTP standard et le service D365
             InitializeHttpClient();
 
@@ -80,6 +78,17 @@ namespace POMsag
                 _configuration.DynamicsApiUrl,
                 _configuration.MaxRecords
             );
+        }
+
+        private void ApiManagerMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var apiManagerForm = new ApiManagerForm(_apiManager))
+            {
+                apiManagerForm.ShowDialog();
+
+                // Mettre à jour les sources si nécessaire
+                LoadApiSourcesInComboBox();
+            }
         }
 
         private void InitializeControls()

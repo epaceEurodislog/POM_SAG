@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using POMsag.Models;
+using NetHttpMethod = System.Net.Http.HttpMethod;
+using ModelHttpMethod = POMsag.Models.HttpMethod;
 
 namespace POMsag
 {
+
     public partial class EndpointEditorForm : Form
     {
         private static class ColorPalette
@@ -19,6 +22,7 @@ namespace POMsag
             public static Color WhiteBackground = Color.White;
             public static Color ErrorColor = Color.FromArgb(229, 62, 62); // Rouge pour erreurs
         }
+
 
         public ApiEndpoint Endpoint { get; private set; }
         private bool _isNewEndpoint;
