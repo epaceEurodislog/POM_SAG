@@ -15,20 +15,20 @@ namespace POMsag
     {
         private const string CONFIG_FILE = "config.ini";
 
-        public string ApiUrl { get; private set; }
-        public string ApiKey { get; private set; }
-        public string DatabaseConnectionString { get; private set; }
+        public string? ApiUrl { get; private set; }
+        public string? ApiKey { get; private set; }
+        public string? DatabaseConnectionString { get; private set; }
 
         // Paramètres pour D365
-        public string TokenUrl { get; private set; }
-        public string ClientId { get; private set; }
-        public string ClientSecret { get; private set; }
-        public string Resource { get; private set; }
-        public string DynamicsApiUrl { get; private set; }
+        public string? TokenUrl { get; private set; }
+        public string? ClientId { get; private set; }
+        public string? ClientSecret { get; private set; }
+        public string? Resource { get; private set; }
+        public string? DynamicsApiUrl { get; private set; }
         public int MaxRecords { get; private set; }
 
         // Paramètre pour numéro d'article spécifique
-        public string SpecificItemNumber { get; private set; }
+        public string? SpecificItemNumber { get; private set; }
 
         // Préférences de sélection des champs
         public Dictionary<string, FieldSelectionPreference> FieldSelections { get; private set; } = new Dictionary<string, FieldSelectionPreference>();

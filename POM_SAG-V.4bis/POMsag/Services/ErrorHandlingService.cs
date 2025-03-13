@@ -1,6 +1,6 @@
 using System;
 using System.Net.Http;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient; // Corriger l'import ici
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,7 +17,7 @@ namespace POMsag.Services
             public static Color InfoColor = Color.FromArgb(49, 130, 206); // Bleu pour informations
         }
 
-        public static void HandleError(Exception ex, string context, Form parentForm = null)
+        public static void HandleError(Exception ex, string context, Form? parentForm = null)
         {
             // Journaliser l'erreur
             LoggerService.LogException(ex, context);

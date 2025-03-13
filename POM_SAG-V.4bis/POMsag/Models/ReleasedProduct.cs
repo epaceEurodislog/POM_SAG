@@ -12,50 +12,50 @@ namespace POMsag.Models
         public Dictionary<string, object> AdditionalProperties { get; set; } = new Dictionary<string, object>();
 
         [JsonPropertyName("@odata.etag")]
-        public string ODataEtag { get; set; }
+        public string? ODataEtag { get; set; }
 
         [JsonPropertyName("dataAreaId")]
-        public string DataAreaId { get; set; }
+        public string? DataAreaId { get; set; }
 
         [JsonPropertyName("ItemNumber")]
-        public string ItemNumber { get; set; }
+        public string? ItemNumber { get; set; }
 
         [JsonPropertyName("IsPhantom")]
-        public string IsPhantom { get; set; }
+        public string? IsPhantom { get; set; }
 
         [JsonPropertyName("IsPurchasePriceIncludingCharges")]
-        public string IsPurchasePriceIncludingCharges { get; set; }
+        public string? IsPurchasePriceIncludingCharges { get; set; }
 
         [JsonPropertyName("ItemFiscalClassificationCode")]
-        public string ItemFiscalClassificationCode { get; set; }
+        public string? ItemFiscalClassificationCode { get; set; }
 
         [JsonPropertyName("SeventhProductFilterCode")]
-        public string SeventhProductFilterCode { get; set; }
+        public string? SeventhProductFilterCode { get; set; }
 
         [JsonPropertyName("ServiceAccountingCode")]
-        public string ServiceAccountingCode { get; set; }
+        public string? ServiceAccountingCode { get; set; }
 
         [JsonPropertyName("MarginABCCode")]
-        public string MarginABCCode { get; set; }
+        public string? MarginABCCode { get; set; }
 
         [JsonPropertyName("IsICMSTaxAppliedOnService")]
-        public string IsICMSTaxAppliedOnService { get; set; }
+        public string? IsICMSTaxAppliedOnService { get; set; }
 
         // Les autres propriétés importantes
         [JsonPropertyName("ProductNumber")]
-        public string ProductNumber { get; set; }
+        public string? ProductNumber { get; set; }
 
         [JsonPropertyName("ProductName")]
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
 
         [JsonPropertyName("ProductDescription")]
-        public string ProductDescription { get; set; }
+        public string? ProductDescription { get; set; }
 
         [JsonPropertyName("ProductType")]
-        public string ProductType { get; set; }
+        public string? ProductType { get; set; }
 
         [JsonPropertyName("ProductSubType")]
-        public string ProductSubType { get; set; }
+        public string? ProductSubType { get; set; }
 
         // Méthode pour obtenir tous les détails
         public string GetFullDetailsAsJson()

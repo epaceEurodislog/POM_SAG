@@ -13,12 +13,22 @@ namespace POMsag.Services
     {
         private readonly AppConfiguration _configuration;
         private readonly HttpClient _httpClient;
-        private readonly DynamicsApiService _dynamicsApiService;
+        private readonly DynamicsApiService? _dynamicsApiService;
 
-        public GenericApiService(AppConfiguration configuration, HttpClient httpClient, DynamicsApiService dynamicsApiService)
+        public GenericApiService(AppConfiguration configuration, HttpClient? httpClient = null, DynamicsApiService? dynamicsApiService = null)
         {
             _configuration = configuration;
-            _httpClient = httpClient;
+            _httpClient = httpClient ?? new HttpClient
+            {
+                BaseAddress = new Uri(_configuration.ApiUrl ?? "http://localhost:5001/")
+            };
+
+            // Ajouter la clé API si disponible
+            if (!string.IsNullOrEmpty(_configuration.ApiKey) && httpClient == null)
+            {
+                _httpClient.DefaultRequestHeaders.Add("X-Api-Key", _configuration.ApiKey);
+            }
+
             _dynamicsApiService = dynamicsApiService;
         }
 

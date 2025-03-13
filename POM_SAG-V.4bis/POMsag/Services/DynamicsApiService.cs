@@ -12,7 +12,7 @@ namespace POMsag.Services
     public class DynamicsApiService
     {
         private readonly HttpClient _httpClient;
-        private string _accessToken;
+        private string? _accessToken;
         private DateTime _tokenExpiry = DateTime.MinValue;
 
         // Configuration des paramètres d'authentification

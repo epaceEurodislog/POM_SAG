@@ -23,6 +23,7 @@ namespace POMsag
         private GenericApiService _genericApiService;
         private SchemaAnalysisService _schemaAnalysisService;
         private bool _isTransferInProgress = false;
+        private Panel progressPanel;
 
         // Exposer le service d'analyse de schéma pour être réutilisé
         public SchemaAnalysisService SchemaAnalysisService => _schemaAnalysisService;
@@ -74,12 +75,12 @@ namespace POMsag
             comboBoxTables.Items.Clear();
             comboBoxTables.Items.AddRange(new string[]
             {
-                "Clients",
-                "Commandes",
-                "Produits",
-                "LignesCommandes",
-                // Nouvelles entités D365
-                "ReleasedProductsV2"
+        "Clients",
+        "Commandes",
+        "Produits",
+        "LignesCommandes",
+        // Nouvelles entités D365
+        "ReleasedProductsV2"
             });
 
             // Bouton de test de connexion API
@@ -155,7 +156,7 @@ namespace POMsag
             statusTitlePanel.Controls.Add(closeStatusButton);
 
             // Zone de texte de statut améliorée
-            statusTextBox = new RichTextBox
+            statusTextBox = new TextBox
             {
                 Multiline = true,
                 ReadOnly = true,
@@ -163,7 +164,7 @@ namespace POMsag
                 BackColor = ColorPalette.WhiteBackground,
                 ForeColor = ColorPalette.PrimaryText,
                 Font = new Font("Consolas", 10),
-                ScrollBars = RichTextBoxScrollBars.Vertical
+                ScrollBars = ScrollBars.Vertical
             };
 
             // Assembler le panneau de statut
