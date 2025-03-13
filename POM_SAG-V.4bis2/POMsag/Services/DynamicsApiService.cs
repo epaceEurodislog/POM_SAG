@@ -5,89 +5,263 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using POMsag.Models;
 
 namespace POMsag.Services
 {
-    public class DynamicsApiService
+    public class DynamicApiService
     {
-        private readonly HttpClient _httpClient;
-        private string? _accessToken;
-        private DateTime _tokenExpiry = DateTime.MinValue;
+        private readonly ApiManager _apiManager;
+        private readonly Dictionary<string, HttpClient> _httpClients = new Dictionary<string, HttpClient>();
+        private readonly Dictionary<string, DateTime> _tokenExpiryTimes = new Dictionary<string, DateTime>();
+        private readonly Dictionary<string, string> _accessTokens = new Dictionary<string, string>();
 
-        // Configuration des paramètres d'authentification
-        private readonly string _tokenUrl;
-        private readonly string _clientId;
-        private readonly string _clientSecret;
-        private readonly string _resource;
-        private readonly string _dynamicsApiUrl;
-        private readonly int _maxRecords;
-
-        public DynamicsApiService(string tokenUrl, string clientId, string clientSecret, string resource, string dynamicsApiUrl, int maxRecords)
+        public DynamicApiService(ApiManager apiManager)
         {
-            _httpClient = new HttpClient();
-            _tokenUrl = tokenUrl;
-            _clientId = clientId;
-            _clientSecret = clientSecret;
-            _resource = resource;
-            _dynamicsApiUrl = dynamicsApiUrl;
-            _maxRecords = maxRecords;
+            _apiManager = apiManager;
         }
 
-        public async Task<string> GetTokenAsync()
+        public async Task<List<Dictionary<string, object>>> FetchDataAsync(
+            string apiName,
+            string endpointName,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            Dictionary<string, string> additionalParams = null)
         {
-            // Si le token est toujours valide, le réutiliser
-            if (_accessToken != null && DateTime.Now < _tokenExpiry)
-            {
-                return _accessToken;
-            }
-
-            LoggerService.Log("Demande d'un nouveau token OAuth");
-
             try
             {
-                // Vérifier que l'URL du token est valide
-                if (string.IsNullOrEmpty(_tokenUrl))
+                LoggerService.Log($"FetchDataAsync - API: {apiName}, Endpoint: {endpointName}");
+
+                // Récupérer la définition de l'API et du endpoint
+                var api = _apiManager.GetApi(apiName);
+                if (api == null)
+                    throw new Exception($"API '{apiName}' non trouvée");
+
+                var endpoint = api.Endpoints.Find(e => e.Name.Equals(endpointName, StringComparison.OrdinalIgnoreCase));
+                if (endpoint == null)
+                    throw new Exception($"Endpoint '{endpointName}' non trouvé dans l'API '{apiName}'");
+
+                // S'assurer qu'un HttpClient existe pour cette API
+                if (!_httpClients.ContainsKey(apiName))
                 {
-                    throw new ArgumentException("L'URL du token ne peut pas être nulle ou vide");
+                    _httpClients[apiName] = new HttpClient
+                    {
+                        BaseAddress = new Uri(api.BaseUrl)
+                    };
                 }
 
-                // S'assurer que l'URL est absolue
-                if (!Uri.IsWellFormedUriString(_tokenUrl, UriKind.Absolute))
+                var httpClient = _httpClients[apiName];
+
+                // Construire l'URL avec les paramètres
+                string url = await BuildRequestUrlAsync(api, endpoint, startDate, endDate, additionalParams);
+                LoggerService.Log($"URL construite: {url}");
+
+                // Configurer l'authentification
+                await ConfigureAuthenticationAsync(httpClient, api);
+
+                // Ajouter les en-têtes personnalisés
+                foreach (var header in api.Headers)
                 {
-                    throw new ArgumentException($"L'URL du token '{_tokenUrl}' n'est pas une URL absolue valide");
+                    httpClient.DefaultRequestHeaders.Remove(header.Key);
+                    httpClient.DefaultRequestHeaders.Add(header.Key, header.Value);
                 }
 
-                // Préparer la requête pour obtenir le token
-                var requestContent = new FormUrlEncodedContent(new[]
+                // Exécuter la requête selon la méthode
+                HttpResponseMessage response;
+                switch (endpoint.Method)
                 {
-                    new KeyValuePair<string, string>("client_id", _clientId),
-                    new KeyValuePair<string, string>("client_secret", _clientSecret),
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("resource", _resource)
-                });
+                    case HttpMethod.Get:
+                        response = await httpClient.GetAsync(url);
+                        break;
+                    case HttpMethod.Post:
+                        // Pour les requêtes POST, on pourrait ajouter un corps plus tard
+                        response = await httpClient.PostAsync(url, new StringContent("{}"));
+                        break;
+                    default:
+                        throw new NotImplementedException($"Méthode HTTP '{endpoint.Method}' non implémentée");
+                }
 
-                // Envoyer la requête
-                var client = new HttpClient(); // Créer un nouveau client pour cette requête
-                var response = await client.PostAsync(_tokenUrl, requestContent);
                 response.EnsureSuccessStatusCode();
 
-                // Traiter la réponse
+                // Lire le contenu de la réponse
+                var content = await response.Content.ReadAsStringAsync();
+                LoggerService.Log($"Réponse reçue: {content.Substring(0, Math.Min(100, content.Length))}...");
+
+                // Désérialiser la réponse JSON
+                var result = ParseJsonResponse(content, endpoint.ResponseRootPath);
+                LoggerService.Log($"Données récupérées: {result.Count} éléments");
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, $"FetchDataAsync - {apiName}/{endpointName}");
+                throw;
+            }
+        }
+
+        private async Task<string> BuildRequestUrlAsync(
+            ApiDefinition api,
+            ApiEndpoint endpoint,
+            DateTime? startDate,
+            DateTime? endDate,
+            Dictionary<string, string> additionalParams)
+        {
+            var uriBuilder = new UriBuilder(api.BaseUrl);
+            var path = endpoint.Path;
+
+            // S'assurer que le chemin commence par / s'il n'est pas déjà inclus dans l'URL de base
+            if (!path.StartsWith("/") && !api.BaseUrl.EndsWith("/"))
+                path = "/" + path;
+
+            uriBuilder.Path += path;
+
+            var query = HttpUtility.ParseQueryString(string.Empty);
+
+            // Ajouter les paramètres globaux de l'API
+            foreach (var param in api.GlobalParameters)
+            {
+                query[param.Key] = param.Value;
+            }
+
+            // Ajouter les paramètres spécifiques au endpoint
+            foreach (var param in endpoint.Parameters)
+            {
+                query[param.Key] = param.Value;
+            }
+
+            // Ajouter les paramètres supplémentaires
+            if (additionalParams != null)
+            {
+                foreach (var param in additionalParams)
+                {
+                    query[param.Key] = param.Value;
+                }
+            }
+
+            // Gérer le filtrage par date si supporté
+            if (endpoint.SupportsDateFiltering && startDate.HasValue && endDate.HasValue)
+            {
+                string startDateStr = startDate.Value.ToString(endpoint.DateFormat);
+                string endDateStr = endDate.Value.ToString(endpoint.DateFormat);
+
+                // Traitement spécial pour les paramètres de date
+                if (endpoint.StartDateParamName.Contains("$filter="))
+                {
+                    // Format OData
+                    string filter = endpoint.StartDateParamName.Replace("@startDate", startDateStr);
+                    if (!string.IsNullOrEmpty(endpoint.EndDateParamName))
+                    {
+                        filter += " " + endpoint.EndDateParamName.Replace("@endDate", endDateStr);
+                    }
+                    query["$filter"] = filter.Replace("$filter=", "");
+                }
+                else
+                {
+                    // Format standard
+                    query[endpoint.StartDateParamName] = startDateStr;
+                    query[endpoint.EndDateParamName] = endDateStr;
+                }
+            }
+
+            uriBuilder.Query = query.ToString();
+            return uriBuilder.Uri.ToString();
+        }
+
+        private async Task ConfigureAuthenticationAsync(HttpClient httpClient, ApiDefinition api)
+        {
+            switch (api.AuthType)
+            {
+                case ApiAuthType.None:
+                    // Aucune authentification nécessaire
+                    break;
+
+                case ApiAuthType.ApiKey:
+                    // Authentification par clé API (généralement dans l'en-tête)
+                    if (api.AuthProperties.TryGetValue("HeaderName", out string headerName) &&
+                        api.AuthProperties.TryGetValue("ApiKey", out string apiKey))
+                    {
+                        if (!httpClient.DefaultRequestHeaders.Contains(headerName))
+                        {
+                            httpClient.DefaultRequestHeaders.Add(headerName, apiKey);
+                        }
+                    }
+                    break;
+
+                case ApiAuthType.OAuth2:
+                    // Authentification OAuth2
+                    if (!_accessTokens.ContainsKey(api.Name) || DateTime.Now >= _tokenExpiryTimes.GetValueOrDefault(api.Name))
+                    {
+                        await GetOAuthTokenAsync(api);
+                    }
+
+                    if (_accessTokens.TryGetValue(api.Name, out string token))
+                    {
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    }
+                    break;
+
+                case ApiAuthType.Basic:
+                    // Authentification HTTP Basic
+                    if (api.AuthProperties.TryGetValue("Username", out string username) &&
+                        api.AuthProperties.TryGetValue("Password", out string password))
+                    {
+                        var authValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authValue);
+                    }
+                    break;
+
+                case ApiAuthType.Bearer:
+                    // Authentification Bearer token (token fourni directement)
+                    if (api.AuthProperties.TryGetValue("Token", out string bearerToken))
+                    {
+                        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", bearerToken);
+                    }
+                    break;
+
+                case ApiAuthType.Custom:
+                    // Authentification personnalisée (à implémenter selon les besoins)
+                    break;
+            }
+        }
+
+        private async Task GetOAuthTokenAsync(ApiDefinition api)
+        {
+            try
+            {
+                if (!api.AuthProperties.TryGetValue("TokenUrl", out string tokenUrl) ||
+                    !api.AuthProperties.TryGetValue("ClientId", out string clientId) ||
+                    !api.AuthProperties.TryGetValue("ClientSecret", out string clientSecret) ||
+                    !api.AuthProperties.TryGetValue("Resource", out string resource))
+                {
+                    throw new Exception("Paramètres OAuth2 incomplets");
+                }
+
+                var requestContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("client_id", clientId),
+                    new KeyValuePair<string, string>("client_secret", clientSecret),
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("resource", resource)
+                });
+
+                using var client = new HttpClient();
+                var response = await client.PostAsync(tokenUrl, requestContent);
+                response.EnsureSuccessStatusCode();
+
                 var responseContent = await response.Content.ReadAsStringAsync();
-                LoggerService.Log($"Réponse du serveur OAuth reçue: {responseContent.Substring(0, Math.Min(50, responseContent.Length))}...");
+                LoggerService.Log("Réponse du serveur OAuth reçue");
 
                 var tokenResponse = JsonSerializer.Deserialize<JsonElement>(responseContent);
+                var accessToken = tokenResponse.GetProperty("access_token").GetString();
 
-                // Extraire les informations du token
-                _accessToken = tokenResponse.GetProperty("access_token").GetString();
-
-                // Traiter le champ "expires_in" qui peut être un nombre ou une chaîne
+                // Gérer la durée de validité du token
                 int expiresIn;
                 var expiresInProp = tokenResponse.GetProperty("expires_in");
 
                 if (expiresInProp.ValueKind == JsonValueKind.String)
                 {
-                    // Si c'est une chaîne, la convertir en entier
                     if (int.TryParse(expiresInProp.GetString(), out int result))
                         expiresIn = result;
                     else
@@ -95,151 +269,131 @@ namespace POMsag.Services
                 }
                 else
                 {
-                    // Si c'est déjà un nombre
                     expiresIn = expiresInProp.GetInt32();
                 }
 
-                _tokenExpiry = DateTime.Now.AddSeconds(expiresIn - 60); // Marge de sécurité d'une minute
+                // Sauvegarder le token et sa date d'expiration
+                _accessTokens[api.Name] = accessToken;
+                _tokenExpiryTimes[api.Name] = DateTime.Now.AddSeconds(expiresIn - 60); // Marge de sécurité
 
-                LoggerService.Log($"Token OAuth obtenu, valide jusqu'à {_tokenExpiry}");
-                return _accessToken;
+                LoggerService.Log($"Token OAuth obtenu pour {api.Name}, valide jusqu'à {_tokenExpiryTimes[api.Name]}");
             }
             catch (Exception ex)
             {
-                LoggerService.LogException(ex, "Obtention du token OAuth");
-                throw new Exception("Erreur lors de l'obtention du token d'authentification", ex);
-            }
-        }
-
-        public async Task<string> GetDataAsync(string endpoint, Dictionary<string, string> filters = null)
-        {
-            // Construire l'URL avec les filtres OData si nécessaire
-            var url = $"{_dynamicsApiUrl}/{endpoint}";
-
-            if (filters != null && filters.Count > 0)
-            {
-                var oDataFilter = BuildODataFilter(filters);
-                url += oDataFilter;
-            }
-
-            LoggerService.Log($"Préparation requête GET vers: {url}");
-
-            try
-            {
-                // Obtenir un token valide
-                var token = await GetTokenAsync();
-
-                // Préparer la requête avec le token
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                // Envoyer la requête
-                LoggerService.Log("Envoi de la requête GET");
-                var response = await _httpClient.SendAsync(request);
-
-                var content = await response.Content.ReadAsStringAsync();
-                LoggerService.Log($"Réponse reçue, statut: {response.StatusCode}");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    LoggerService.Log($"Erreur API: {response.StatusCode} - {content}");
-                    throw new Exception($"Erreur de l'API Dynamics: {response.StatusCode} - {content}");
-                }
-
-                // Retourner le contenu de la réponse
-                return content;
-            }
-            catch (Exception ex)
-            {
-                LoggerService.LogException(ex, $"GetDataAsync pour {endpoint}");
+                LoggerService.LogException(ex, $"GetOAuthTokenAsync pour {api.Name}");
                 throw;
             }
         }
 
-        private string BuildODataFilter(Dictionary<string, string> filters)
-        {
-            if (filters == null || filters.Count == 0)
-                return string.Empty;
-
-            var filterParts = new List<string>();
-            bool hasQueryParam = false;
-
-            foreach (var filter in filters)
-            {
-                if (string.IsNullOrEmpty(filter.Key) || string.IsNullOrEmpty(filter.Value))
-                    continue;
-
-                if (!hasQueryParam)
-                {
-                    hasQueryParam = true;
-                    filterParts.Add("?$filter=");
-                }
-                else
-                {
-                    filterParts.Add(" and ");
-                }
-
-                filterParts.Add($"{filter.Key} {filter.Value}");
-            }
-
-            return string.Concat(filterParts);
-        }
-
-        public async Task<List<ReleasedProduct>> GetReleasedProductsAsync(
-            DateTime? startPurchaseDate = null,
-            DateTime? endPurchaseDate = null)
+        private List<Dictionary<string, object>> ParseJsonResponse(string jsonContent, string rootPath)
         {
             try
             {
-                // Construction de l'URL de base sans limite fixe
-                var baseUrl = $"ReleasedProductsV2?cross-company=true";
+                var result = new List<Dictionary<string, object>>();
 
-                // Construire la partie filtre
-                var filterParts = new List<string>();
+                if (string.IsNullOrWhiteSpace(jsonContent))
+                    return result;
 
-                // Filtre par date d'achat
-                if (startPurchaseDate.HasValue && endPurchaseDate.HasValue)
-                {
-                    filterParts.Add($"PurchasePriceDate ge {startPurchaseDate.Value:yyyy-MM-dd}T00:00:00Z and PurchasePriceDate le {endPurchaseDate.Value:yyyy-MM-dd}T23:59:59Z");
-                }
-
-                // Ajouter les filtres à l'URL
-                if (filterParts.Count > 0)
-                {
-                    baseUrl += "&$filter=" + string.Join(" and ", filterParts);
-                }
-
-                // Ajouter la limite dynamique
-                baseUrl += $"&$top={_maxRecords}";
-
-                LoggerService.Log($"URL de requête OData: {baseUrl}");
-
-                var jsonContent = await GetDataAsync(baseUrl);
-
-                // Désérialisation
                 using (var document = JsonDocument.Parse(jsonContent))
                 {
-                    if (document.RootElement.TryGetProperty("value", out var valueElement))
-                    {
-                        var products = JsonSerializer.Deserialize<List<ReleasedProduct>>(
-                            valueElement.GetRawText(),
-                            new JsonSerializerOptions
-                            {
-                                PropertyNameCaseInsensitive = true
-                            }
-                        );
+                    JsonElement root = document.RootElement;
 
-                        return products ?? new List<ReleasedProduct>();
+                    // Si un chemin racine est spécifié, naviguer jusqu'à cet élément
+                    if (!string.IsNullOrWhiteSpace(rootPath))
+                    {
+                        var pathParts = rootPath.Split('.');
+
+                        foreach (var part in pathParts)
+                        {
+                            if (root.ValueKind == JsonValueKind.Object && root.TryGetProperty(part, out var property))
+                            {
+                                root = property;
+                            }
+                            else
+                            {
+                                // Chemin non trouvé, retourner liste vide
+                                return result;
+                            }
+                        }
                     }
 
-                    return new List<ReleasedProduct>();
+                    // Extraire les données selon le type
+                    if (root.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var item in root.EnumerateArray())
+                        {
+                            var dict = new Dictionary<string, object>();
+
+                            if (item.ValueKind == JsonValueKind.Object)
+                            {
+                                foreach (var property in item.EnumerateObject())
+                                {
+                                    dict[property.Name] = ExtractValue(property.Value);
+                                }
+
+                                result.Add(dict);
+                            }
+                        }
+                    }
+                    else if (root.ValueKind == JsonValueKind.Object)
+                    {
+                        // Si c'est un objet unique plutôt qu'un tableau
+                        var dict = new Dictionary<string, object>();
+
+                        foreach (var property in root.EnumerateObject())
+                        {
+                            dict[property.Name] = ExtractValue(property.Value);
+                        }
+
+                        result.Add(dict);
+                    }
                 }
+
+                return result;
             }
             catch (Exception ex)
             {
-                LoggerService.LogException(ex, "GetReleasedProductsAsync");
-                throw new Exception("Erreur lors de la récupération des produits depuis Dynamics 365", ex);
+                LoggerService.LogException(ex, "ParseJsonResponse");
+                throw;
+            }
+        }
+
+        private object ExtractValue(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.Number:
+                    if (element.TryGetInt32(out int intValue))
+                        return intValue;
+                    if (element.TryGetInt64(out long longValue))
+                        return longValue;
+                    if (element.TryGetDecimal(out decimal decimalValue))
+                        return decimalValue;
+                    return element.GetDouble();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Null:
+                    return null;
+                case JsonValueKind.Object:
+                    var obj = new Dictionary<string, object>();
+                    foreach (var property in element.EnumerateObject())
+                    {
+                        obj[property.Name] = ExtractValue(property.Value);
+                    }
+                    return obj;
+                case JsonValueKind.Array:
+                    var array = new List<object>();
+                    foreach (var item in element.EnumerateArray())
+                    {
+                        array.Add(ExtractValue(item));
+                    }
+                    return array;
+                default:
+                    return null;
             }
         }
     }

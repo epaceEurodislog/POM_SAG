@@ -24,6 +24,9 @@ namespace POMsag
         private SchemaAnalysisService _schemaAnalysisService;
         private bool _isTransferInProgress = false;
         private Panel progressPanel;
+        private ApiManager _apiManager;
+        private DynamicApiService _dynamicApiService;
+        private ToolStripMenuItem _apiManagerMenuItem;
 
         // Exposer le service d'analyse de schéma pour être réutilisé
         public SchemaAnalysisService SchemaAnalysisService => _schemaAnalysisService;
@@ -34,6 +37,16 @@ namespace POMsag
 
             // Initialiser la configuration
             _configuration = new AppConfiguration();
+
+            // Créer le répertoire des APIs s'il n'existe pas
+            if (!Directory.Exists("APIs"))
+            {
+                Directory.CreateDirectory("APIs");
+            }
+
+            // Initialiser le gestionnaire d'API
+            _apiManager = new ApiManager();
+            _dynamicApiService = new DynamicApiService(_apiManager);
 
             // Initialiser le client HTTP standard et le service D365
             InitializeHttpClient();
@@ -71,17 +84,14 @@ namespace POMsag
 
         private void InitializeControls()
         {
+            // Ajoutez ceci dans le menu Fichier
+            _apiManagerMenuItem = new ToolStripMenuItem("Gestionnaire d'API");
+            _apiManagerMenuItem.Click += ApiManagerMenuItem_Click;
+            fileMenuItem.DropDownItems.Insert(1, _apiManagerMenuItem);
+
             // Mise à jour des choix pour inclure les tables D365
             comboBoxTables.Items.Clear();
-            comboBoxTables.Items.AddRange(new string[]
-            {
-        "Clients",
-        "Commandes",
-        "Produits",
-        "LignesCommandes",
-        // Nouvelles entités D365
-        "ReleasedProductsV2"
-            });
+            LoadApiSourcesInComboBox();
 
             // Bouton de test de connexion API
             var buttonTestConnection = new Button
@@ -223,6 +233,28 @@ namespace POMsag
             dateTimePickerEnd.Enabled = false;
         }
 
+        private void LoadApiSourcesInComboBox()
+        {
+            comboBoxTables.Items.Clear();
+
+            // Ajouter les sources traditionnelles (pour la rétrocompatibilité)
+            comboBoxTables.Items.Add("Clients");
+            comboBoxTables.Items.Add("Commandes");
+            comboBoxTables.Items.Add("Produits");
+            comboBoxTables.Items.Add("LignesCommandes");
+            comboBoxTables.Items.Add("ReleasedProductsV2");
+
+            // Ajouter les endpoints des API dynamiques
+            var apis = _apiManager.GetAllApis();
+            foreach (var api in apis)
+            {
+                foreach (var endpoint in api.Endpoints)
+                {
+                    comboBoxTables.Items.Add($"{api.Name}:{endpoint.Name}");
+                }
+            }
+        }
+
         private void ConfigButton_Click(object sender, EventArgs e)
         {
             using (var configForm = new ConfigurationForm(_configuration, _schemaAnalysisService))
@@ -332,20 +364,41 @@ namespace POMsag
 
             try
             {
-                // Déterminer la source des données (Dynamics ou API POM)
-                string source = selectedTable == "ReleasedProductsV2" ? "dynamics" : "pom";
-
                 DateTime? startDate = checkBoxDateFilter.Checked ? dateTimePickerStart.Value : (DateTime?)null;
                 DateTime? endDate = checkBoxDateFilter.Checked ? dateTimePickerEnd.Value : (DateTime?)null;
 
-                ShowStatus($"Récupération des données depuis {source} ({selectedTable})...", StatusType.Info);
+                List<Dictionary<string, object>> data;
 
-                // Mettre à jour la barre de progression
-                progressBar.Value = 10;
-                UpdateProgressLabel();
+                // Vérifier si c'est une source API dynamique (format: ApiName:EndpointName)
+                if (selectedTable.Contains(":"))
+                {
+                    var parts = selectedTable.Split(':');
+                    string apiName = parts[0];
+                    string endpointName = parts[1];
 
-                // Récupérer les données avec le service générique
-                List<Dictionary<string, object>> data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
+                    ShowStatus($"Récupération des données depuis l'API dynamique {apiName} (endpoint: {endpointName})...", StatusType.Info);
+
+                    // Mettre à jour la barre de progression
+                    progressBar.Value = 10;
+                    UpdateProgressLabel();
+
+                    // Utiliser le service API dynamique
+                    data = await _dynamicApiService.FetchDataAsync(apiName, endpointName, startDate, endDate);
+                }
+                else
+                {
+                    // Déterminer la source des données (Dynamics ou API POM)
+                    string source = selectedTable == "ReleasedProductsV2" ? "dynamics" : "pom";
+
+                    ShowStatus($"Récupération des données depuis {source} ({selectedTable})...", StatusType.Info);
+
+                    // Mettre à jour la barre de progression
+                    progressBar.Value = 10;
+                    UpdateProgressLabel();
+
+                    // Récupérer les données avec le service générique
+                    data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
+                }
 
                 // Mise à jour du progrès
                 progressBar.Value = 50;
