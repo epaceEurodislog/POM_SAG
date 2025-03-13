@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using POMsag.Models;
+using POMsag.Services;
 // Définir des alias pour éviter l'ambiguïté
 using NetHttpMethod = System.Net.Http.HttpMethod;
 using ModelHttpMethod = POMsag.Models.HttpMethod;
@@ -10,7 +11,6 @@ using ModelHttpMethod = POMsag.Models.HttpMethod;
 
 namespace POMsag
 {
-
     public partial class EndpointEditorForm : Form
     {
         private static class ColorPalette
@@ -25,8 +25,8 @@ namespace POMsag
             public static Color ErrorColor = Color.FromArgb(229, 62, 62); // Rouge pour erreurs
         }
 
-
-        public ApiEndpoint Endpoint { get; private set; }
+        // Remplacer la propriété par un champ privé
+        private readonly ApiEndpoint _endpoint;
         private bool _isNewEndpoint;
 
         private TextBox textBoxName;
@@ -43,12 +43,25 @@ namespace POMsag
         private Button buttonSave;
         private Button buttonCancel;
 
+        // Méthode pour obtenir l'endpoint depuis l'extérieur
+        public ApiEndpoint GetEndpoint()
+        {
+            LoggerService.Log("EndpointEditorForm: GetEndpoint appelé");
+            return _endpoint;
+        }
+
+        // Constructeur modifié
         public EndpointEditorForm(ApiEndpoint endpoint)
         {
+            LoggerService.Log($"EndpointEditorForm: Constructeur appelé avec endpoint={endpoint?.Name ?? "null"}");
+
             _isNewEndpoint = endpoint == null;
-            Endpoint = endpoint ?? new ApiEndpoint();
+            _endpoint = endpoint ?? new ApiEndpoint();
+
             InitializeComponent();
             LoadEndpointData();
+
+            LoggerService.Log("EndpointEditorForm: Initialisation terminée");
         }
 
         private void InitializeComponent()
@@ -350,28 +363,36 @@ namespace POMsag
 
         private void LoadEndpointData()
         {
-            if (Endpoint != null)
+            LoggerService.Log("EndpointEditorForm: LoadEndpointData appelé");
+
+            if (_endpoint != null)
             {
-                textBoxName.Text = Endpoint.Name;
-                textBoxDescription.Text = Endpoint.Description;
-                textBoxPath.Text = Endpoint.Path;
-                comboBoxMethod.SelectedItem = Endpoint.Method.ToString();
-                textBoxResponseRootPath.Text = Endpoint.ResponseRootPath;
+                textBoxName.Text = _endpoint.Name;
+                textBoxDescription.Text = _endpoint.Description;
+                textBoxPath.Text = _endpoint.Path;
+                comboBoxMethod.SelectedItem = _endpoint.Method.ToString();
+                textBoxResponseRootPath.Text = _endpoint.ResponseRootPath;
 
                 // Charger les paramètres
                 gridParameters.Rows.Clear();
-                foreach (var param in Endpoint.Parameters)
+                foreach (var param in _endpoint.Parameters)
                 {
                     gridParameters.Rows.Add(param.Key, param.Value);
                 }
 
                 // Paramètres de filtrage par date
-                checkBoxDateFiltering.Checked = Endpoint.SupportsDateFiltering;
-                textBoxStartDateParam.Text = Endpoint.StartDateParamName;
-                textBoxEndDateParam.Text = Endpoint.EndDateParamName;
-                textBoxDateFormat.Text = Endpoint.DateFormat;
+                checkBoxDateFiltering.Checked = _endpoint.SupportsDateFiltering;
+                textBoxStartDateParam.Text = _endpoint.StartDateParamName;
+                textBoxEndDateParam.Text = _endpoint.EndDateParamName;
+                textBoxDateFormat.Text = _endpoint.DateFormat;
 
-                panelDateFiltering.Visible = Endpoint.SupportsDateFiltering;
+                panelDateFiltering.Visible = _endpoint.SupportsDateFiltering;
+
+                LoggerService.Log("EndpointEditorForm: Données chargées avec succès");
+            }
+            else
+            {
+                LoggerService.Log("EndpointEditorForm: ATTENTION - _endpoint est null");
             }
         }
 
@@ -379,6 +400,8 @@ namespace POMsag
         {
             try
             {
+                LoggerService.Log("EndpointEditorForm: ButtonSave_Click appelé");
+
                 // Valider les champs obligatoires
                 if (string.IsNullOrWhiteSpace(textBoxName.Text))
                 {
@@ -397,14 +420,14 @@ namespace POMsag
                 }
 
                 // Mettre à jour les propriétés
-                Endpoint.Name = textBoxName.Text;
-                Endpoint.Description = textBoxDescription.Text;
-                Endpoint.Path = textBoxPath.Text;
-                Endpoint.Method = (ModelHttpMethod)Enum.Parse(typeof(ModelHttpMethod), comboBoxMethod.SelectedItem?.ToString() ?? "Get");
-                Endpoint.ResponseRootPath = textBoxResponseRootPath.Text;
+                _endpoint.Name = textBoxName.Text;
+                _endpoint.Description = textBoxDescription.Text;
+                _endpoint.Path = textBoxPath.Text;
+                _endpoint.Method = (ModelHttpMethod)Enum.Parse(typeof(ModelHttpMethod), comboBoxMethod.SelectedItem?.ToString() ?? "Get");
+                _endpoint.ResponseRootPath = textBoxResponseRootPath.Text;
 
                 // Paramètres
-                Endpoint.Parameters = new Dictionary<string, string>();
+                _endpoint.Parameters = new Dictionary<string, string>();
                 foreach (DataGridViewRow row in gridParameters.Rows)
                 {
                     if (row.IsNewRow) continue;
@@ -414,23 +437,25 @@ namespace POMsag
 
                     if (!string.IsNullOrWhiteSpace(key))
                     {
-                        Endpoint.Parameters[key] = value ?? "";
+                        _endpoint.Parameters[key] = value ?? "";
                     }
                 }
 
                 // Filtrage par date
-                Endpoint.SupportsDateFiltering = checkBoxDateFiltering.Checked;
-                if (Endpoint.SupportsDateFiltering)
+                _endpoint.SupportsDateFiltering = checkBoxDateFiltering.Checked;
+                if (_endpoint.SupportsDateFiltering)
                 {
-                    Endpoint.StartDateParamName = textBoxStartDateParam.Text;
-                    Endpoint.EndDateParamName = textBoxEndDateParam.Text;
-                    Endpoint.DateFormat = textBoxDateFormat.Text;
+                    _endpoint.StartDateParamName = textBoxStartDateParam.Text;
+                    _endpoint.EndDateParamName = textBoxEndDateParam.Text;
+                    _endpoint.DateFormat = textBoxDateFormat.Text;
                 }
 
+                LoggerService.Log($"EndpointEditorForm: Endpoint sauvegardé : {_endpoint.Name}");
                 this.DialogResult = DialogResult.OK;
             }
             catch (Exception ex)
             {
+                LoggerService.LogException(ex, "EndpointEditorForm.ButtonSave_Click");
                 MessageBox.Show(
                     $"Erreur lors de l'enregistrement : {ex.Message}",
                     "Erreur",

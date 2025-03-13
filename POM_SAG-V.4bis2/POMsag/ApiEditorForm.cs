@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using POMsag.Models;
 using POMsag.Services;
 #pragma warning disable CS8618, CS8625, CS8600, CS8602, CS8603, CS8604, CS8601
+using POMsag;
 
 namespace POMsag
 {
@@ -867,7 +868,7 @@ namespace POMsag
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    var endpoint = form.Endpoint;
+                    var endpoint = form.GetEndpoint();
 
                     var item = new ListViewItem(endpoint.Name);
                     item.SubItems.Add(endpoint.Description ?? "");

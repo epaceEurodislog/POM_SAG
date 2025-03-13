@@ -239,13 +239,6 @@ namespace POMsag
         {
             comboBoxTables.Items.Clear();
 
-            // Ajouter les sources traditionnelles (pour la rétrocompatibilité)
-            comboBoxTables.Items.Add("Clients");
-            comboBoxTables.Items.Add("Commandes");
-            comboBoxTables.Items.Add("Produits");
-            comboBoxTables.Items.Add("LignesCommandes");
-            comboBoxTables.Items.Add("ReleasedProductsV2");
-
             // Ajouter les endpoints des API dynamiques
             var apis = _apiManager.GetAllApis();
             foreach (var api in apis)
@@ -371,37 +364,36 @@ namespace POMsag
 
                 List<Dictionary<string, object>> data;
 
-                // Vérifier si c'est une source API dynamique (format: ApiName:EndpointName)
+                // Traitement des données selon la source
                 if (selectedTable.Contains(":"))
                 {
-                    var parts = selectedTable.Split(':');
-                    string apiName = parts[0];
-                    string endpointName = parts[1];
+                    // Format API:Endpoint
+                    string[] apiParts = selectedTable.Split(':');
+                    string apiSource = apiParts[0];
+                    string apiEndpoint = apiParts[1];
 
-                    ShowStatus($"Récupération des données depuis l'API dynamique {apiName} (endpoint: {endpointName})...", StatusType.Info);
+                    ShowStatus($"Récupération des données depuis l'API dynamique {apiSource} (endpoint: {apiEndpoint})...", StatusType.Info);
 
-                    // Mettre à jour la barre de progression
+                    // Mise à jour progression
                     progressBar.Value = 10;
                     UpdateProgressLabel();
 
-                    var parts = selectedTable.Split(':');
-                    string apiName = parts[0];
-                    string endpoint = parts[1];
-                    data = await _dynamicsApiService.FetchDataAsync(apiName, endpoint, startDate, endDate);
+                    // Récupération des données
+                    data = await _dynamicsApiService.FetchDataAsync(apiSource, apiEndpoint, startDate, endDate);
                 }
                 else
                 {
-                    // Déterminer la source des données (Dynamics ou API POM)
+                    // Source standard
                     string source = selectedTable == "ReleasedProductsV2" ? "dynamics" : "pom";
 
                     ShowStatus($"Récupération des données depuis {source} ({selectedTable})...", StatusType.Info);
 
-                    // Mettre à jour la barre de progression
+                    // Mise à jour progression
                     progressBar.Value = 10;
                     UpdateProgressLabel();
 
-                    // Récupérer les données avec le service générique
-                    data = await _genericApiService.FetchDataAsync("dynamics", endpointName, startDate, endDate);
+                    // Récupération des données
+                    data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
                 }
 
                 // Mise à jour du progrès

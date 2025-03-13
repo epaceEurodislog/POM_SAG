@@ -1,0 +1,69 @@
+{
+  "Name": "POM",
+  "Description": "API standard POM pour r\u00E9cup\u00E9rer les donn\u00E9es clients, commandes, etc.",
+  "BaseUrl": "http://localhost:5001/",
+  "AuthType": 1,
+  "AuthProperties": {
+    "HeaderName": "X-Api-Key",
+    "ApiKey": ""
+  },
+  "Headers": {},
+  "Endpoints": [
+    {
+      "Name": "Clients",
+      "Description": "R\u00E9cup\u00E8re la liste des clients",
+      "Path": "api/clients",
+      "Method": 0,
+      "Parameters": {},
+      "SupportsDateFiltering": true,
+      "StartDateParamName": "startDate",
+      "EndDateParamName": "endDate",
+      "DateFormat": "yyyyMMdd",
+      "ResponseRootPath": "value",
+      "FieldMappings": {}
+    },
+    {
+      "Name": "Commandes",
+      "Description": "R\u00E9cup\u00E8re la liste des commandes",
+      "Path": "api/commandes",
+      "Method": 0,
+      "Parameters": {},
+      "SupportsDateFiltering": true,
+      "StartDateParamName": "startDate",
+      "EndDateParamName": "endDate",
+      "DateFormat": "yyyyMMdd",
+      "ResponseRootPath": "value",
+      "FieldMappings": {}
+    },
+    {
+      "Name": "Produits",
+      "Description": "R\u00E9cup\u00E8re la liste des produits",
+      "Path": "api/produits",
+      "Method": 0,
+      "Parameters": {},
+      "SupportsDateFiltering": false,
+      "StartDateParamName": null,
+      "EndDateParamName": null,
+      "DateFormat": "yyyy-MM-dd",
+      "ResponseRootPath": "value",
+      "FieldMappings": {}
+    },
+    {
+      "Name": "LignesCommandes",
+      "Description": "R\u00E9cup\u00E8re les lignes de commandes",
+      "Path": "api/lignescommandes",
+      "Method": 0,
+      "Parameters": {},
+      "SupportsDateFiltering": true,
+      "StartDateParamName": "startDate",
+      "EndDateParamName": "endDate",
+      "DateFormat": "yyyyMMdd",
+      "ResponseRootPath": "value",
+      "FieldMappings": {}
+    }
+  ],
+  "GlobalParameters": {},
+  "IsEnabled": true,
+  "CreatedDate": "2025-03-13T14:28:34.5563446+01:00",
+  "LastModifiedDate": "2025-03-13T14:28:34.5624767+01:00"
+}
