@@ -49,17 +49,28 @@ namespace POMsag.Services
                     throw new Exception("Paramètres OAuth2 incomplets");
                 }
 
+                LoggerService.Log($"Tentative d'obtention d'un token OAuth avec ClientId: {clientId}, Resource: {resource}");
+
                 var requestContent = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", clientId),
-                    new KeyValuePair<string, string>("client_secret", clientSecret),
-                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
-                    new KeyValuePair<string, string>("resource", resource)
-                });
+            new KeyValuePair<string, string>("client_id", clientId),
+            new KeyValuePair<string, string>("client_secret", clientSecret),
+            new KeyValuePair<string, string>("grant_type", "client_credentials"),
+            new KeyValuePair<string, string>("resource", resource)
+        });
 
                 using var client = new HttpClient();
+                LoggerService.Log($"Envoi d'une demande de token à: {tokenUrl}");
                 var response = await client.PostAsync(tokenUrl, requestContent);
-                response.EnsureSuccessStatusCode();
+
+                // Ajout de logs pour les erreurs
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    LoggerService.Log($"ERREUR: Échec d'obtention du token. Code: {(int)response.StatusCode} {response.StatusCode}");
+                    LoggerService.Log($"Contenu de l'erreur: {errorContent}");
+                    response.EnsureSuccessStatusCode(); // Laisser l'exception se propager
+                }
 
                 var responseContent = await response.Content.ReadAsStringAsync();
                 LoggerService.Log("Réponse du serveur OAuth reçue");
@@ -126,6 +137,7 @@ namespace POMsag.Services
                 var httpClient = _httpClients[dynamicsApi.Name];
 
                 // Obtenir le token d'accès
+                LoggerService.Log("Obtention du token OAuth pour Dynamics 365");
                 string token = await GetTokenAsync();
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
@@ -169,10 +181,21 @@ namespace POMsag.Services
                 }
 
                 uriBuilder.Query = query.ToString();
+                LoggerService.Log($"URL de requête Dynamics 365: {uriBuilder.Uri}");
 
                 // Exécuter la requête
                 var response = await httpClient.GetAsync(uriBuilder.Uri);
-                response.EnsureSuccessStatusCode();
+
+                // Ajouter ceci pour log la réponse complète en cas d'erreur
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    LoggerService.Log($"ERREUR: Réponse HTTP non réussie. Code: {(int)response.StatusCode} {response.StatusCode}");
+                    LoggerService.Log($"Contenu de l'erreur: {errorContent.Substring(0, Math.Min(500, errorContent.Length))}...");
+
+                    // Retourner une liste vide au lieu de générer une exception
+                    return new List<ReleasedProduct>();
+                }
 
                 var content = await response.Content.ReadAsStringAsync();
                 LoggerService.Log($"Réponse reçue: {content.Substring(0, Math.Min(100, content.Length))}...");
@@ -216,7 +239,7 @@ namespace POMsag.Services
             catch (Exception ex)
             {
                 LoggerService.LogException(ex, "GetReleasedProductsAsync");
-                throw;
+                return new List<ReleasedProduct>(); // Retourner une liste vide plutôt que de propager l'exception
             }
         }
 
@@ -227,7 +250,18 @@ namespace POMsag.Services
                 var result = new List<Dictionary<string, object>>();
 
                 if (string.IsNullOrWhiteSpace(jsonContent))
+                {
+                    LoggerService.Log("AVERTISSEMENT: jsonContent est vide ou null");
                     return result;
+                }
+
+                // Vérifier si le contenu commence par "<" (probablement du XML ou HTML)
+                if (jsonContent.TrimStart().StartsWith("<"))
+                {
+                    LoggerService.Log("ERREUR: Contenu non-JSON reçu, commence par '<'. Probablement une réponse XML ou une erreur HTML.");
+                    LoggerService.Log($"Début du contenu: {jsonContent.Substring(0, Math.Min(200, jsonContent.Length))}...");
+                    return result;
+                }
 
                 using (var document = JsonDocument.Parse(jsonContent))
                 {
@@ -247,6 +281,7 @@ namespace POMsag.Services
                             else
                             {
                                 // Chemin non trouvé, retourner liste vide
+                                LoggerService.Log($"AVERTISSEMENT: Chemin '{part}' non trouvé dans la réponse JSON");
                                 return result;
                             }
                         }
@@ -282,6 +317,10 @@ namespace POMsag.Services
 
                         result.Add(dict);
                     }
+                    else
+                    {
+                        LoggerService.Log($"AVERTISSEMENT: Type de racine inattendu: {root.ValueKind}");
+                    }
                 }
 
                 return result;
@@ -289,7 +328,8 @@ namespace POMsag.Services
             catch (Exception ex)
             {
                 LoggerService.LogException(ex, "ParseJsonResponse");
-                throw;
+                LoggerService.Log($"Contenu problématique: {(jsonContent != null ? jsonContent.Substring(0, Math.Min(300, jsonContent.Length)) : "null")}...");
+                return new List<Dictionary<string, object>>();
             }
         }
 

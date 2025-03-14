@@ -402,7 +402,7 @@ public partial class ConfigurationForm : Form
         {
             Text = "Attention : Récupérer tous les articles peut prendre du temps et causer des problèmes de performance.",
             Location = new Point(10, 350),
-            Size = new Size(520, 50),
+            Size = new Size(520, 60),
             ForeColor = ColorPalette.ErrorColor,
             Font = new Font("Segoe UI", 10, FontStyle.Regular)
         };
@@ -508,7 +508,7 @@ public partial class ConfigurationForm : Form
         {
             Text = "Note : Cette analyse peut prendre un peu de temps en fonction de la taille des données et de la vitesse de réponse de l'API.",
             Location = new Point(10, 390),
-            Size = new Size(520, 40),
+            Size = new Size(520, 60),
             ForeColor = ColorPalette.SecondaryText,
             Font = new Font("Segoe UI", 9, FontStyle.Italic)
         };

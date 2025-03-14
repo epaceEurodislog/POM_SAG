@@ -154,7 +154,29 @@ namespace POMsag
                 _deselectAllButton.Enabled = false;
 
                 // Récupérer les champs disponibles
+                LoggerService.Log($"Tentative de découverte des champs pour {_entityName} (source: {_sourceType})");
+
+                // Ajouter un délai pour voir les logs précédents
+                await Task.Delay(500);
+
+                // Essayer d'abord avec un petit échantillon
                 _availableFields = await _schemaAnalysisService.DiscoverFields(_sourceType, _entityName);
+
+                // Si aucun champ n'est trouvé, utiliser une liste de champs par défaut pour certaines entités
+                if (_availableFields.Count == 0)
+                {
+                    LoggerService.Log($"Aucun champ découvert, utilisation des champs par défaut pour {_entityName}");
+
+                    // Fournir des champs par défaut pour ReleasedProductsV2
+                    if (_entityName == "ReleasedProductsV2")
+                    {
+                        _availableFields = new HashSet<string> {
+                    "@odata.etag", "dataAreaId", "ItemNumber", "IsPhantom",
+                    "ProductNumber", "ProductName", "ProductDescription",
+                    "ProductType", "ProductSubType", "ProductDimension"
+                };
+                    }
+                }
 
                 // Mettre à jour l'interface
                 _fieldsListBox.Items.Clear();
@@ -173,12 +195,37 @@ namespace POMsag
             {
                 _statusLabel.Text = $"Erreur lors du chargement des champs: {ex.Message}";
                 LoggerService.LogException(ex, "Chargement des champs");
+
                 MessageBox.Show(
-                    $"Erreur lors du chargement des champs: {ex.Message}",
+                    $"Erreur lors du chargement des champs: {ex.Message}\n\nL'application va charger une liste de champs par défaut.",
                     "Erreur",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
+                    MessageBoxIcon.Warning
                 );
+
+                // Chargement de champs par défaut en cas d'erreur
+                _availableFields = new HashSet<string>();
+                if (_entityName == "ReleasedProductsV2")
+                {
+                    _availableFields = new HashSet<string> {
+                "@odata.etag", "dataAreaId", "ItemNumber", "IsPhantom",
+                "ProductNumber", "ProductName", "ProductDescription",
+                "ProductType", "ProductSubType", "ProductDimension"
+            };
+                }
+
+                // Mettre à jour l'interface avec les champs par défaut
+                _fieldsListBox.Items.Clear();
+                foreach (var field in _availableFields.OrderBy(f => f))
+                {
+                    _fieldsListBox.Items.Add(field, _configuration.IsFieldSelected(_entityName, field));
+                }
+
+                _statusLabel.Text = $"{_availableFields.Count} champs par défaut chargés.";
+                _fieldsListBox.Enabled = true;
+                _saveButton.Enabled = true;
+                _selectAllButton.Enabled = true;
+                _deselectAllButton.Enabled = true;
             }
         }
 

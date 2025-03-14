@@ -11,6 +11,8 @@ using POMsag.Services;
 using POMsag.Models;
 using System.IO;
 using System.Linq;
+using POMsag.Styles;
+using POMsag.Controls;
 
 namespace POMsag
 {
@@ -24,6 +26,10 @@ namespace POMsag
         private SchemaAnalysisService _schemaAnalysisService;
         private bool _isTransferInProgress = false;
         private Panel progressPanel;
+
+        // Composants d'UI modernisés
+        private NotificationPanel _notificationPanel;
+        private List<DashboardPanel> _dashboardWidgets = new List<DashboardPanel>();
 
         // Exposer le service d'analyse de schéma pour être réutilisé
         public SchemaAnalysisService SchemaAnalysisService => _schemaAnalysisService;
@@ -46,6 +52,17 @@ namespace POMsag
 
             // Initialiser les contrôles
             InitializeControls();
+
+            // Ajouter le tableau de bord
+            //AddDashboard();
+
+            // Initialiser le panel de notification
+            _notificationPanel = new NotificationPanel(this);
+            this.Controls.Add(_notificationPanel);
+
+            // Afficher un message de bienvenue
+            _notificationPanel.ShowNotification("Bienvenue dans l'application de transfert de données POM",
+                NotificationPanel.NotificationType.Info);
         }
 
         private void InitializeHttpClient()
@@ -75,143 +92,13 @@ namespace POMsag
             comboBoxTables.Items.Clear();
             comboBoxTables.Items.AddRange(new string[]
             {
-        "Clients",
-        "Commandes",
-        "Produits",
-        "LignesCommandes",
-        // Nouvelles entités D365
-        "ReleasedProductsV2"
+                "Clients",
+                "Commandes",
+                "Produits",
+                "LignesCommandes",
+                // Nouvelles entités D365
+                "ReleasedProductsV2"
             });
-
-            // Bouton de test de connexion API
-            var buttonTestConnection = new Button
-            {
-                Text = "Tester la connexion",
-                Size = new Size(150, 35),
-                BackColor = ColorPalette.SecondaryBackground,
-                ForeColor = ColorPalette.PrimaryText,
-                FlatStyle = FlatStyle.Flat,
-                Location = new Point(20, 390) // Ajustez la position selon votre layout
-            };
-            buttonTestConnection.FlatAppearance.BorderSize = 1;
-            buttonTestConnection.FlatAppearance.BorderColor = ColorPalette.BorderColor;
-            buttonTestConnection.Click += ButtonTestConnection_Click;
-
-            // Amélioration du panneau de statut
-            statusPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 200,
-                BackColor = ColorPalette.SecondaryBackground,
-                Padding = new Padding(5),
-                BorderStyle = BorderStyle.FixedSingle
-            };
-
-            // Titre du panneau de statut
-            var statusTitlePanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 30,
-                BackColor = ColorPalette.AccentColor
-            };
-
-            var statusTitle = new Label
-            {
-                Text = "Journal d'exécution",
-                Dock = DockStyle.Fill,
-                ForeColor = Color.White,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                Padding = new Padding(5, 0, 0, 0)
-            };
-
-            // Bouton de fermeture du panneau
-            var closeStatusButton = new Button
-            {
-                Text = "×",
-                Dock = DockStyle.Right,
-                Width = 30,
-                BackColor = ColorPalette.AccentColor,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 }
-            };
-            closeStatusButton.Click += (s, e) => statusPanel.Visible = false;
-
-            // Bouton pour effacer le journal
-            var clearStatusButton = new Button
-            {
-                Text = "Effacer",
-                Dock = DockStyle.Right,
-                Width = 80,
-                BackColor = ColorPalette.AccentColor,
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 }
-            };
-            clearStatusButton.Click += (s, e) => statusTextBox.Clear();
-
-            statusTitlePanel.Controls.Add(statusTitle);
-            statusTitlePanel.Controls.Add(clearStatusButton);
-            statusTitlePanel.Controls.Add(closeStatusButton);
-
-            // Zone de texte de statut améliorée
-            statusTextBox = new RichTextBox
-            {
-                Multiline = true,
-                ReadOnly = true,
-                Dock = DockStyle.Fill,
-                BackColor = ColorPalette.WhiteBackground,
-                ForeColor = ColorPalette.PrimaryText,
-                Font = new Font("Consolas", 10),
-                ScrollBars = RichTextBoxScrollBars.Vertical,
-            };
-
-            // Assembler le panneau de statut
-            statusPanel.Controls.Add(statusTextBox);
-            statusPanel.Controls.Add(statusTitlePanel);
-            statusPanel.Visible = false;
-
-            // Barre de progression améliorée
-            progressPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 40,
-                Padding = new Padding(10, 8, 10, 8)
-            };
-
-            progressBar = new ProgressBar
-            {
-                Dock = DockStyle.Fill,
-                Style = ProgressBarStyle.Continuous,
-                Value = 0,
-                Maximum = 100,
-                BackColor = ColorPalette.SecondaryBackground,
-                ForeColor = ColorPalette.AccentColor
-            };
-
-            var progressLabel = new Label
-            {
-                Dock = DockStyle.Right,
-                Width = 60,
-                Text = "0%",
-                TextAlign = ContentAlignment.MiddleRight,
-                ForeColor = ColorPalette.PrimaryText
-            };
-
-            progressPanel.Controls.Add(progressBar);
-            progressPanel.Controls.Add(progressLabel);
-            progressPanel.Visible = false;
-
-            // Attacher les gestionnaires d'événements
-            comboBoxTables.SelectedIndexChanged += ComboBoxTables_SelectedIndexChanged;
-            checkBoxDateFilter.CheckedChanged += CheckBoxDateFilter_CheckedChanged;
-            buttonTransfer.Click += ButtonTransfer_Click;
-
-            // Ajouter les contrôles au formulaire
-            this.Controls.Add(buttonTestConnection);
-            this.Controls.Add(statusPanel);
-            this.Controls.Add(progressPanel);
 
             // Valeurs par défaut
             dateTimePickerStart.Value = DateTime.Now.AddMonths(-1);
@@ -221,6 +108,165 @@ namespace POMsag
             buttonTransfer.Enabled = false;
             dateTimePickerStart.Enabled = false;
             dateTimePickerEnd.Enabled = false;
+        }
+
+        private void AddDashboard()
+        {
+            // Conteneur pour le tableau de bord
+            var dashboardPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 200,
+                Padding = new Padding(20),
+                BackColor = ThemeColors.PrimaryBackground
+            };
+
+            // Widgets du tableau de bord
+            var transfersWidget = new DashboardPanel
+            {
+                Title = "Transferts totaux",
+                Value = "0",
+                InfoText = "Transferts effectués aujourd'hui"
+            };
+            _dashboardWidgets.Add(transfersWidget);
+
+            var recordsWidget = new DashboardPanel
+            {
+                Title = "Enregistrements",
+                Value = "0",
+                InfoText = "Données transférées aujourd'hui"
+            };
+            _dashboardWidgets.Add(recordsWidget);
+
+            var statusWidget = new DashboardPanel
+            {
+                Title = "État du système",
+                Value = "En ligne",
+                InfoText = "Tous les services sont actifs"
+            };
+            _dashboardWidgets.Add(statusWidget);
+
+            // Disposition des widgets
+            transfersWidget.Location = new Point(20, 20);
+            recordsWidget.Location = new Point(290, 20);
+            statusWidget.Location = new Point(560, 20);
+
+            // Ajouter les widgets au tableau de bord
+            dashboardPanel.Controls.Add(transfersWidget);
+            dashboardPanel.Controls.Add(recordsWidget);
+            dashboardPanel.Controls.Add(statusWidget);
+
+            // Ajouter le tableau de bord au formulaire principal
+            this.Controls.Add(dashboardPanel);
+
+            // Mettre à jour les stats initiales
+            UpdateDashboardStats();
+        }
+
+        private void UpdateDashboardStats()
+        {
+            try
+            {
+                // On récupère les statistiques
+                int transferCount = GetTodayTransferCount();
+                int recordCount = GetTodayRecordsCount();
+                bool servicesOnline = CheckServicesStatus();
+
+                // Mise à jour des widgets
+                if (_dashboardWidgets.Count >= 3)
+                {
+                    _dashboardWidgets[0].Value = transferCount.ToString();
+                    _dashboardWidgets[1].Value = recordCount.ToString("N0"); // Format avec séparateurs de milliers
+
+                    _dashboardWidgets[2].Value = servicesOnline ? "En ligne" : "Hors ligne";
+                    _dashboardWidgets[2].InfoText = servicesOnline
+                        ? "Tous les services sont actifs"
+                        : "Un ou plusieurs services sont indisponibles";
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "Mise à jour du tableau de bord");
+            }
+        }
+
+        // Méthodes pour les statistiques du tableau de bord
+        private int GetTodayTransferCount()
+        {
+            // Dans une implémentation complète, vous récupéreriez ces données depuis la base
+            try
+            {
+                using var connection = new SqlConnection(_destinationConnectionString);
+                connection.Open();
+
+                string query = @"
+                    SELECT COUNT(DISTINCT SourceTable) 
+                    FROM JSON_DAT 
+                    WHERE CreatedAt = @today";
+
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@today", DateTime.Now.ToString("yyyyMMdd"));
+
+                var result = command.ExecuteScalar();
+                if (result != null && result != DBNull.Value)
+                {
+                    return Convert.ToInt32(result);
+                }
+            }
+            catch
+            {
+                // Silencieusement ignorer les erreurs pour ne pas bloquer l'UI
+            }
+
+            return 0;
+        }
+
+        private int GetTodayRecordsCount()
+        {
+            // Récupérer le nombre d'enregistrements pour aujourd'hui
+            try
+            {
+                using var connection = new SqlConnection(_destinationConnectionString);
+                connection.Open();
+
+                string query = @"
+                    SELECT COUNT(*) 
+                    FROM JSON_DAT 
+                    WHERE CreatedAt = @today";
+
+                using var command = new SqlCommand(query, connection);
+                command.Parameters.AddWithValue("@today", DateTime.Now.ToString("yyyyMMdd"));
+
+                var result = command.ExecuteScalar();
+                if (result != null && result != DBNull.Value)
+                {
+                    return Convert.ToInt32(result);
+                }
+            }
+            catch
+            {
+                // Silencieusement ignorer les erreurs pour ne pas bloquer l'UI
+            }
+
+            return 0;
+        }
+
+        private bool CheckServicesStatus()
+        {
+            // Vérifier si les services sont disponibles
+            try
+            {
+                // Vérifier si la base de données est accessible
+                using var connection = new SqlConnection(_destinationConnectionString);
+                connection.Open();
+
+                // Si on arrive ici, la connexion est OK
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void ConfigButton_Click(object sender, EventArgs e)
@@ -234,6 +280,14 @@ namespace POMsag
 
                 // Recréer le service générique avec la nouvelle configuration
                 _genericApiService = new GenericApiService(_configuration, _httpClient, _dynamicsApiService);
+
+                // Réinitialiser le statut de connexion
+                if (connectionStatusLabel != null)
+                    connectionStatusLabel.Text = "État: Non testé";
+
+                // Afficher une notification
+                _notificationPanel.ShowNotification("Configuration mise à jour",
+                    NotificationPanel.NotificationType.Info);
             }
         }
 
@@ -252,7 +306,8 @@ namespace POMsag
         {
             if (comboBoxTables.SelectedItem == null)
             {
-                MessageBox.Show("Veuillez d'abord sélectionner une table.", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _notificationPanel.ShowNotification("Veuillez d'abord sélectionner une table.",
+                    NotificationPanel.NotificationType.Warning);
                 return;
             }
 
@@ -260,9 +315,13 @@ namespace POMsag
             string source = selectedTable == "ReleasedProductsV2" ? "dynamics" : "pom";
 
             // Désactiver le bouton pendant le test
-            var button = (Button)sender;
+            var button = (RoundedButton)sender;
             button.Enabled = false;
             button.Text = "Test en cours...";
+
+            // Mettre à jour le libellé d'état
+            if (connectionStatusLabel != null)
+                connectionStatusLabel.Text = "État: Test en cours...";
 
             try
             {
@@ -274,11 +333,15 @@ namespace POMsag
                     await _dynamicsApiService.GetTokenAsync(); // Test d'authentification
                     var testResult = await _dynamicsApiService.GetReleasedProductsAsync(null, null);
 
-                    MessageBox.Show(
-                        $"Connexion à Dynamics 365 réussie!\n\nServeur: {_configuration.DynamicsApiUrl}\nEndpoint: {selectedTable}\nTest: {testResult.Count} enregistrement(s) récupéré(s)",
-                        "Test de connexion",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
+                    if (connectionStatusLabel != null)
+                    {
+                        connectionStatusLabel.Text = $"État: Connecté à Dynamics 365 • {testResult.Count} enreg.";
+                        connectionStatusLabel.ForeColor = ThemeColors.SuccessColor;
+                    }
+
+                    _notificationPanel.ShowNotification(
+                        $"Connexion à Dynamics 365, {testResult.Count} enregistrement(s) récupéré(s)",
+                        NotificationPanel.NotificationType.Success
                     );
                 }
                 else
@@ -288,11 +351,15 @@ namespace POMsag
                     response.EnsureSuccessStatusCode();
                     var content = await response.Content.ReadAsStringAsync();
 
-                    MessageBox.Show(
-                        $"Connexion à l'API POM réussie!\n\nServeur: {_configuration.ApiUrl}\nEndpoint: {selectedTable}\nRéponse: {content.Length} caractères",
-                        "Test de connexion",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
+                    if (connectionStatusLabel != null)
+                    {
+                        connectionStatusLabel.Text = $"État: Connecté à l'API POM • {content.Length} car.";
+                        connectionStatusLabel.ForeColor = ThemeColors.SuccessColor;
+                    }
+
+                    _notificationPanel.ShowNotification(
+                        $"Connexion à l'API POM réussie, {content.Length} caractères reçus",
+                        NotificationPanel.NotificationType.Success
                     );
                 }
 
@@ -301,8 +368,19 @@ namespace POMsag
             catch (Exception ex)
             {
                 LoggerService.LogException(ex, $"Test de connexion {source}/{selectedTable}");
+
+                if (connectionStatusLabel != null)
+                {
+                    connectionStatusLabel.Text = $"État: Échec de connexion";
+                    connectionStatusLabel.ForeColor = ThemeColors.ErrorColor;
+                }
+
                 ShowStatus($"Erreur lors du test de connexion: {ex.Message}", StatusType.Error);
-                ShowErrorDetail($"Test de connexion {source}/{selectedTable}", ex);
+                _notificationPanel.ShowNotification(
+                    $"Échec de connexion: {ex.Message.Substring(0, Math.Min(100, ex.Message.Length))}",
+                    NotificationPanel.NotificationType.Error,
+                    false
+                );
             }
             finally
             {
@@ -324,8 +402,8 @@ namespace POMsag
 
             // Afficher la barre de progression et le statut
             progressBar.Value = 0;
-            progressPanel.Visible = true;
-            statusPanel.Visible = true;
+            progressBar.Visible = true;
+            AnimationEffects.FadeIn(statusPanel);
 
             LoggerService.Log($"Début du transfert pour: {selectedTable}");
             ShowStatus($"Transfert en cours pour {selectedTable}...", StatusType.Info);
@@ -342,14 +420,18 @@ namespace POMsag
 
                 // Mettre à jour la barre de progression
                 progressBar.Value = 10;
-                UpdateProgressLabel();
+
+                // Notification de démarrage
+                _notificationPanel.ShowNotification(
+                    $"Transfert démarré pour {selectedTable}",
+                    NotificationPanel.NotificationType.Info
+                );
 
                 // Récupérer les données avec le service générique
                 List<Dictionary<string, object>> data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
 
                 // Mise à jour du progrès
                 progressBar.Value = 50;
-                UpdateProgressLabel();
 
                 ShowStatus($"Récupération terminée. {data.Count} enregistrements trouvés.", StatusType.Success);
 
@@ -373,7 +455,6 @@ namespace POMsag
                     {
                         int newProgress = 50 + (processedItems * 20 / totalItems);
                         progressBar.Value = Math.Min(70, newProgress);
-                        UpdateProgressLabel();
 
                         if (processedItems % (progressStep * 5) == 0)
                         {
@@ -387,16 +468,22 @@ namespace POMsag
                     progress =>
                     {
                         progressBar.Value = 70 + (int)(progress * 30); // de 70% à 100%
-                        UpdateProgressLabel();
                     });
 
                 // Affichage terminé
                 progressBar.Value = 100;
-                UpdateProgressLabel();
 
                 // Modification ici - N'afficher le message de succès qu'une seule fois
                 ShowStatus("Enregistrement terminé avec succès.", StatusType.Success);
-                ShowSuccessMessage($"Transfert réussi ! {filteredData.Count} enregistrements transférés.");
+
+                // Notification de succès avec animation
+                _notificationPanel.ShowNotification(
+                    $"Transfert réussi : {filteredData.Count} enregistrements transférés",
+                    NotificationPanel.NotificationType.Success
+                );
+
+                // Mettre à jour les statistiques du tableau de bord
+                UpdateDashboardStats();
 
                 LoggerService.Log($"Transfert terminé avec succès pour {selectedTable}. {filteredData.Count} enregistrements.");
             }
@@ -404,7 +491,13 @@ namespace POMsag
             {
                 LoggerService.LogException(ex, $"Transfert {selectedTable}");
                 ShowStatus($"Erreur lors du transfert: {ex.Message}", StatusType.Error);
-                ShowErrorDetail($"Transfert {selectedTable}", ex);
+
+                // Notification d'erreur
+                _notificationPanel.ShowNotification(
+                    $"Erreur lors du transfert: {ex.Message.Substring(0, Math.Min(80, ex.Message.Length))}...",
+                    NotificationPanel.NotificationType.Error,
+                    false
+                );
             }
             finally
             {
@@ -414,7 +507,7 @@ namespace POMsag
 
                 // Cacher la barre de progression après quelques secondes
                 await Task.Delay(3000);
-                progressPanel.Visible = false;
+                AnimationEffects.FadeOut(progressBar);
             }
         }
 
@@ -460,20 +553,6 @@ namespace POMsag
             return filtered;
         }
 
-        // Méthode pour mettre à jour le label de progression
-        private void UpdateProgressLabel()
-        {
-            var progressPanel = Controls.OfType<Panel>().FirstOrDefault(p => p.Contains(progressBar));
-            if (progressPanel != null)
-            {
-                var label = progressPanel.Controls.OfType<Label>().FirstOrDefault();
-                if (label != null)
-                {
-                    label.Text = $"{progressBar.Value}%";
-                }
-            }
-        }
-
         private void ShowStatus(string message, StatusType type = StatusType.Info)
         {
             Color textColor;
@@ -482,19 +561,19 @@ namespace POMsag
             switch (type)
             {
                 case StatusType.Error:
-                    textColor = Color.Red;
+                    textColor = ThemeColors.ErrorColor;
                     prefix = "ERREUR: ";
                     break;
                 case StatusType.Warning:
-                    textColor = Color.DarkOrange;
+                    textColor = ThemeColors.WarningColor;
                     prefix = "ATTENTION: ";
                     break;
                 case StatusType.Success:
-                    textColor = Color.Green;
+                    textColor = ThemeColors.SuccessColor;
                     prefix = "SUCCÈS: ";
                     break;
                 default:
-                    textColor = ColorPalette.PrimaryText;
+                    textColor = ThemeColors.PrimaryText;
                     prefix = "";
                     break;
             }
@@ -554,11 +633,9 @@ namespace POMsag
 
             if (!File.Exists(logFilePath))
             {
-                MessageBox.Show(
+                _notificationPanel.ShowNotification(
                     "Aucun fichier de log n'existe encore.",
-                    "Information",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
+                    NotificationPanel.NotificationType.Warning
                 );
                 return;
             }
@@ -570,53 +647,83 @@ namespace POMsag
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
+                _notificationPanel.ShowNotification(
                     $"Impossible d'ouvrir le fichier de log: {ex.Message}",
-                    "Erreur",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
+                    NotificationPanel.NotificationType.Error
                 );
             }
         }
 
         private void AboutMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(
-                "POM SAG - Outil de Transfert de Données\n" +
-                "Version 2.5\n\n" +
-                "Application permettant de transférer des données depuis:\n" +
-                "- L'API POM\n" +
-                "- Dynamics 365 Finance & Operations\n\n" +
-                "Améliorations v2.5:\n" +
-                "- Sélection des champs à transférer\n" +
-                "- Service API générique\n" +
-                "- Test de connexion\n" +
-                "- Traitement des erreurs amélioré\n" +
-                "- Interface utilisateur améliorée",
-                "À propos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
+            _notificationPanel.ShowNotification(
+                "POM SAG - Outil de Transfert de Données v2.5",
+                NotificationPanel.NotificationType.Info
             );
-        }
 
-        private void ShowErrorMessage(string message)
-        {
-            MessageBox.Show(
-                message,
-                "Erreur",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error
-            );
-        }
+            // Créer une form "À propos" plus jolie
+            var aboutForm = new Form
+            {
+                Text = "À propos",
+                Size = new Size(500, 400),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                MaximizeBox = false,
+                MinimizeBox = false,
+                BackColor = ThemeColors.PrimaryBackground,
+                Font = new Font("Segoe UI", 10)
+            };
 
-        private void ShowSuccessMessage(string message)
-        {
-            MessageBox.Show(
-                message,
-                "Succès",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+            var titleLabel = new Label
+            {
+                Text = "POM SAG - Outil de Transfert de Données",
+                Font = new Font("Segoe UI Light", 16, FontStyle.Regular),
+                ForeColor = ThemeColors.PrimaryText,
+                AutoSize = true,
+                Location = new Point(20, 20)
+            };
+
+            var versionLabel = new Label
+            {
+                Text = "Version 2.5",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                ForeColor = ThemeColors.AccentColor,
+                AutoSize = true,
+                Location = new Point(20, 50)
+            };
+
+            var descriptionLabel = new Label
+            {
+                Text = "Application permettant de transférer des données depuis:\n" +
+                    "- L'API POM\n" +
+                    "- Dynamics 365 Finance & Operations\n\n" +
+                    "Améliorations v2.5:\n" +
+                    "- Sélection des champs à transférer\n" +
+                    "- Service API générique\n" +
+                    "- Test de connexion\n" +
+                    "- Traitement des erreurs amélioré\n" +
+                    "- Interface utilisateur améliorée",
+                Location = new Point(20, 90),
+                Size = new Size(440, 200),
+                ForeColor = ThemeColors.PrimaryText
+            };
+
+            var closeButton = new RoundedButton
+            {
+                Text = "Fermer",
+                Location = new Point(200, 300),
+                Size = new Size(100, 40),
+                IsPrimary = true,
+                BorderRadius = 8
+            };
+            closeButton.Click += (s, ev) => aboutForm.Close();
+
+            aboutForm.Controls.Add(titleLabel);
+            aboutForm.Controls.Add(versionLabel);
+            aboutForm.Controls.Add(descriptionLabel);
+            aboutForm.Controls.Add(closeButton);
+
+            aboutForm.ShowDialog(this);
         }
 
         private async Task SaveToDestinationDbAsync(List<Dictionary<string, object>> data, string tableName, Action<double> progressCallback = null)

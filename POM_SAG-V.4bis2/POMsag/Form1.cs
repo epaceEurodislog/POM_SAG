@@ -364,36 +364,94 @@ namespace POMsag
 
                 List<Dictionary<string, object>> data;
 
-                // Traitement des données selon la source
+                // Traitement selon le type de source
                 if (selectedTable.Contains(":"))
                 {
-                    // Format API:Endpoint
+                    // Cas d'un API dynamique au format ApiName:EndpointName
                     string[] apiParts = selectedTable.Split(':');
                     string apiSource = apiParts[0];
                     string apiEndpoint = apiParts[1];
 
                     ShowStatus($"Récupération des données depuis l'API dynamique {apiSource} (endpoint: {apiEndpoint})...", StatusType.Info);
 
-                    // Mise à jour progression
+                    // Mettre à jour la barre de progression
                     progressBar.Value = 10;
                     UpdateProgressLabel();
 
-                    // Récupération des données
+                    // Appel au service approprié
                     data = await _dynamicsApiService.FetchDataAsync(apiSource, apiEndpoint, startDate, endDate);
                 }
                 else
                 {
-                    // Source standard
+                    // Cas standard (API POM ou Dynamics)
                     string source = selectedTable == "ReleasedProductsV2" ? "dynamics" : "pom";
 
                     ShowStatus($"Récupération des données depuis {source} ({selectedTable})...", StatusType.Info);
 
-                    // Mise à jour progression
+                    // Mettre à jour la barre de progression
                     progressBar.Value = 10;
                     UpdateProgressLabel();
 
-                    // Récupération des données
-                    data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
+                    try
+                    {
+                        // Récupérer les données avec le service générique
+                        data = await _genericApiService.FetchDataAsync(source, selectedTable, startDate, endDate);
+
+                        if (data == null || data.Count == 0)
+                        {
+                            // Si aucune donnée n'est retournée, essayer directement avec DynamicsApiService
+                            if (source == "dynamics")
+                            {
+                                ShowStatus("Aucune donnée récupérée, tentative directe via DynamicsApiService...", StatusType.Warning);
+                                var products = await _dynamicsApiService.GetReleasedProductsAsync(startDate, endDate);
+
+                                // Convertir les ReleasedProduct en Dictionary<string, object>
+                                data = new List<Dictionary<string, object>>();
+                                foreach (var product in products)
+                                {
+                                    var dict = product.ToDictionary();
+                                    data.Add(dict);
+                                }
+
+                                ShowStatus($"Récupération directe réussie: {data.Count} éléments", StatusType.Success);
+                            }
+                        }
+                    }
+                    catch (Exception fetchEx)
+                    {
+                        // En cas d'erreur avec l'API générique, utiliser DynamicsApiService directement
+                        LoggerService.LogException(fetchEx, "Erreur FetchDataAsync, tentative alternative");
+                        ShowStatus("Erreur lors de la récupération, tentative alternative...", StatusType.Warning);
+
+                        if (source == "dynamics")
+                        {
+                            var products = await _dynamicsApiService.GetReleasedProductsAsync(startDate, endDate);
+
+                            // Convertir les ReleasedProduct en Dictionary<string, object>
+                            data = new List<Dictionary<string, object>>();
+                            foreach (var product in products)
+                            {
+                                var dict = product.ToDictionary();
+                                data.Add(dict);
+                            }
+                        }
+                        else
+                        {
+                            // Pour les autres sources, propager l'exception
+                            throw;
+                        }
+                    }
+                }
+
+                // Vérifier si les données sont vides
+                if (data == null || data.Count == 0)
+                {
+                    ShowStatus("Aucune donnée récupérée. Vérifiez les paramètres et réessayez.", StatusType.Warning);
+                    progressBar.Value = 100;
+                    UpdateProgressLabel();
+                    _isTransferInProgress = false;
+                    buttonTransfer.Enabled = comboBoxTables.SelectedItem != null;
+                    return;
                 }
 
                 // Mise à jour du progrès
@@ -431,23 +489,36 @@ namespace POMsag
                     }
                 }
 
+                // Enregistrer les données dans la base de données
                 ShowStatus("Enregistrement des données dans la base de destination...", StatusType.Info);
-                await SaveToDestinationDbAsync(filteredData, selectedTable,
-                    progress =>
-                    {
-                        progressBar.Value = 70 + (int)(progress * 30); // de 70% à 100%
-                        UpdateProgressLabel();
-                    });
 
-                // Affichage terminé
-                progressBar.Value = 100;
-                UpdateProgressLabel();
+                // Sauvegarder chaque élément individuellement pour assurer une ligne par article
+                try
+                {
+                    // Utiliser SaveIndividualItemsToDbAsync pour sauvegarder élément par élément
+                    await SaveIndividualItemsToDbAsync(filteredData, selectedTable,
+                        progress =>
+                        {
+                            progressBar.Value = 70 + (int)(progress * 30); // de 70% à 100%
+                            UpdateProgressLabel();
+                        });
 
-                // Modification ici - N'afficher le message de succès qu'une seule fois
-                ShowStatus("Enregistrement terminé avec succès.", StatusType.Success);
-                ShowSuccessMessage($"Transfert réussi ! {filteredData.Count} enregistrements transférés.");
+                    // Affichage terminé
+                    progressBar.Value = 100;
+                    UpdateProgressLabel();
 
-                LoggerService.Log($"Transfert terminé avec succès pour {selectedTable}. {filteredData.Count} enregistrements.");
+                    // Modification ici - N'afficher le message de succès qu'une seule fois
+                    ShowStatus("Enregistrement terminé avec succès.", StatusType.Success);
+                    ShowSuccessMessage($"Transfert réussi ! {filteredData.Count} enregistrements transférés.");
+
+                    LoggerService.Log($"Transfert terminé avec succès pour {selectedTable}. {filteredData.Count} enregistrements.");
+                }
+                catch (Exception dbEx)
+                {
+                    LoggerService.LogException(dbEx, "Erreur d'enregistrement en base de données");
+                    ShowStatus($"Erreur lors de l'enregistrement en BDD: {dbEx.Message}", StatusType.Error);
+                    ShowErrorDetail("Erreur BDD", dbEx);
+                }
             }
             catch (Exception ex)
             {
@@ -507,6 +578,91 @@ namespace POMsag
             }
 
             return filtered;
+        }
+
+        private async Task SaveIndividualItemsToDbAsync(List<Dictionary<string, object>> data, string tableName, Action<double> progressCallback = null)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_destinationConnectionString);
+                await connection.OpenAsync();
+
+                // Vérifier si la table JSON_DAT existe, sinon la créer
+                var checkTableQuery = @"
+            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'JSON_DAT')
+            CREATE TABLE JSON_DAT (
+                JSON_KEYU INT IDENTITY(1,1) PRIMARY KEY,
+                JsonContent NVARCHAR(MAX) NOT NULL,
+                CreatedAt VARCHAR(8) NOT NULL,
+                SourceTable VARCHAR(50) NOT NULL
+            )";
+
+                using (var command = new SqlCommand(checkTableQuery, connection))
+                {
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                string formattedDate = DateTime.Now.ToString("yyyyMMdd");
+                int totalCount = data.Count;
+                int insertedCount = 0;
+
+                // Utiliser une transaction pour garantir la cohérence
+                using var transaction = connection.BeginTransaction();
+
+                try
+                {
+                    // Traiter chaque élément individuellement
+                    foreach (var item in data)
+                    {
+                        // Sérialiser en JSON
+                        var itemJson = JsonSerializer.Serialize(item, new JsonSerializerOptions { WriteIndented = false });
+
+                        // Requête d'insertion
+                        var query = @"
+                    INSERT INTO JSON_DAT (JsonContent, CreatedAt, SourceTable) 
+                    VALUES (@JsonContent, @CreatedAt, @SourceTable);";
+
+                        using var insertCommand = new SqlCommand(query, connection, transaction);
+                        insertCommand.Parameters.AddWithValue("@JsonContent", itemJson);
+                        insertCommand.Parameters.AddWithValue("@CreatedAt", formattedDate);
+                        insertCommand.Parameters.AddWithValue("@SourceTable", tableName);
+
+                        // Exécuter l'insertion
+                        await insertCommand.ExecuteNonQueryAsync();
+
+                        // Mise à jour du compteur et de la progression
+                        insertedCount++;
+
+                        // Journaliser périodiquement
+                        if (insertedCount % 10 == 0 || insertedCount == totalCount)
+                        {
+                            double progress = (double)insertedCount / totalCount;
+                            progressCallback?.Invoke(progress);
+
+                            if (insertedCount % 100 == 0 || insertedCount == totalCount)
+                            {
+                                LoggerService.Log($"Insertion: {insertedCount}/{totalCount} éléments");
+                            }
+                        }
+                    }
+
+                    // Valider la transaction une fois toutes les insertions terminées
+                    transaction.Commit();
+                    LoggerService.Log($"Transaction validée : {insertedCount} éléments insérés dans JSON_DAT");
+                }
+                catch (Exception ex)
+                {
+                    // En cas d'erreur, annuler la transaction
+                    transaction.Rollback();
+                    LoggerService.Log($"Transaction annulée suite à une erreur : {ex.Message}");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerService.LogException(ex, "SaveIndividualItemsToDbAsync");
+                throw;
+            }
         }
 
         // Méthode pour mettre à jour le label de progression
